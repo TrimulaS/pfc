@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>PCF</title>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+</head>
+
+<!-- 
+Resize 
+-->
+
+<style>
+
+	html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+
+		/* background-color:cornflowerblue;
+		border-color:mediumspringgreen; */
+	} 
+
+	#pra {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+	}
+
+	#c-main {
+		display: flex;
+		width: calc(100% - 10px);
+		height: calc(100% - 10px);
+		margin: 5px;
+		background-color: aqua;
+	}
+
+	#c-nodes {
+		display: flex;
+		flex-direction: column;
+		width: 50%; /* Занимает половину ширины */
+		height: 100%;
+	}
+
+	#c-tree, #c-prop {
+		flex: 1;
+		border: 1px solid red; /* Для отладки */
+	}
+
+	#c-tree p,
+	#c-prop p,
+	#c-log > p  {
+		margin: 0;
+		padding: 0;
+	}
+
+	#c-graph {
+		flex: 1;
+		border: 1px solid blue; /* Для отладки */
+	}
+
+
+	.container{
+		display: flex;
+		box-sizing: border-box;
+
+		border: solid 1px darkgreen;
+
+	}
+
+
+</style>
+
+<!--
+
+Shape
+	Sizes
+		Top
+		Left
+		Width
+		Height
+		Color
+
+
+-->
+
+<body>
+	<script src = './js/split2.js'>	</script>
+	<script src = './js/transform2D.js'>	</script>
+
+	<div id = 'pra'>
+		<div id = 'c-main' class="container">
+			<div id = 'c-nodes' class="container">
+				<div>
+					<div></div>
+					<div id = 'c-tree' class="container"></div>
+				</div>
+				
+				<div id = 'c-log' class="container"></div>
+			</div>
+			<!-- <div id = 'c-graph' class="container "></div> -->
+			<canvas id="c-graph" class="container"></canvas>
+		</div>
+	</div>
+
+	<script>
+
+		// document.addEventListener('DOMContentLoaded', () => {
+		// });
+		
+		const cMain = document.getElementById('c-main');
+		const cNodes = document.getElementById('c-nodes');
+		const cTree = document.getElementById('c-tree');
+		const cLog = document.getElementById('c-log');
+		const cGraph = document.getElementById('c-graph');
+
+
+		new Split2().insertSplitter( cMain, 'row', 0.4);
+		new Split2().insertSplitter( cNodes, 'column', 0.7);
+
+
+		function rectToString(rect){
+			return ` ${rect.left}  :   ${rect.top}  _    ${rect.width}  x  ${rect.height}`
+		}
+
+		// Shapes parameters
+		const shapesNum = 800
+		let Xmin = 60
+		let Xmax = 1000
+		let Ymin = 20
+		let Ymax = 600
+
+
+		
+		class Shape{
+			constructor(type, left, top, color = 'blue', id=''){
+				this.type = type
+				this.left = Math.floor(left)
+				this.top = Math.floor(top)
+				this.width =  Math.floor	(Math.random() * 60 + 1)
+				this.height =  Math.floor	(Math.random() * 20 + 1)
+				this.color = color
+				if(id=='') this.id =  Math.floor(Math.random() * 9999 + 1)
+				
+			}
+			getBoundingClientRect(){
+				return this.boundingRect;
+			}
+			toString(){
+				return `shape:${this.shape}: ${this.left} x ${this.top}  [ ${this.width} x ${this.height} ]`
+			}
+		}
+
+		const shapes = []
+
+		// Fill up with random
+		for(let i = 0; i< shapesNum; i++){
+			
+			let type;
+			switch (Math.floor(Math.random() * 4)) {
+				case 0:
+					type = 'circle';
+					break;
+				case 1:
+					type = 'rect';
+					break;
+				case 2:
+					type = 'line';
+					break;
+				case 3:
+					type = 'point';
+					break;
+				default:
+					type = 'none'; // Этот случай фактически не будет достигнут
+			}
+			const color = `rgba(${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.random().toFixed(2)})`;
+			shapes.push( new Shape (type, Xmin + Math.random() * (Xmax - Xmin), Ymin + Math.random() * (Ymax - Ymin), color))
+		}
+
+			
+		
+		
+		
+		//Processing
+		 
+		// shapes.forEach(element =>{
+		// 	//ta.textContent += element.toString()
+		// 	log(element.toString())
+		// })
+
+		//Define whole shapes bounds:
+		Xmin = shapes[0].left
+		Xmax = shapes[0].left + shapes[0].width
+		Ymin = shapes[0].top
+		Ymax = shapes[0].top  + shapes[0].height
+
+		for(let i = 1; i< shapes.length; i++){
+			const s = shapes[i]
+			if(Xmin > s.left) Xmin = s.left
+			if(Xmax < s.left + s.width ) Xmax = s.left + s.width
+			if(Ymin > s.top) Ymin = s.top
+			if(Ymax < s.top + s.height ) Ymax = s.top + s.height
+		}
+		log(`Boundaries ${Xmin} x ${Ymin} .. ${Xmax} x ${Ymax}`)
+
+
+
+		cGraph.width = cGraph.clientWidth; // Установка ширины canvas
+		cGraph.height = cGraph.clientHeight; // Установка высоты canvas
+		const ctx = cGraph.getContext('2d');
+
+		// Define k and shift to display full staff
+		let Wv = cGraph.clientWidth
+		let Hv = cGraph.clientHeight
+
+		let t = new Transform2D(Wv, Hv, Xmin, Xmax, Ymin, Ymax);
+		const xToPx = t.xToPx.bind(t)			// Binding methods for convinience
+		const yToPy = t.yToPy.bind(t)
+
+		function draw(){
+			cTree.innerHTML=''
+			ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
+			
+
+			shapes.forEach(s =>{
+				if (s.width * t.k < 5 && s.height * t.k < 5) {
+					return; // Пропускаем слишком маленькие фигуры
+				}
+
+				if (
+					s.left + s.width >= t.visibleLeft &&
+					s.left 			 <= t.visibleRight &&
+					s.top + s.height >= t.visibleTop &&
+					s.top 			 <= t.visibleBottom
+				) {
+
+					// Drawing shape
+					addListItem(cTree, s.type + ' ' + s.id)
+
+					ctx.fillStyle = s.color
+
+					switch (s.type) {
+						case 'rect':
+							ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * t.k, s.height * t.k);
+							break;
+						case 'circle':
+							ctx.beginPath();
+							ctx.ellipse(
+								xToPx(s.left + s.width / 2), // Центр X
+								yToPy(s.top + s.height / 2), // Центр Y
+								s.width * t.k / 2,             // Радиус по X
+								s.height * t.k / 2,            // Радиус по Y
+								0,                           // Угол поворота
+								0,                           // Начальный угол
+								Math.PI * 2                  // Конечный угол (полный круг)
+							);
+							ctx.fill();
+							break;
+						case 'line':
+							ctx.beginPath();
+							ctx.moveTo( xToPx( s.left ) , yToPy( s.top ) );
+							ctx.lineTo( xToPx( s.left + s.width ) , yToPy( s.top + s.height ) );
+							ctx.closePath();
+							ctx.strokeStyle = s.color;
+							ctx.stroke();
+							break;
+						case 'point':
+							ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+							break;
+						default:
+							console.log('(!) Wrong shape type')	
+						    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+					}
+
+
+					
+					// ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * k, s.height * k);
+				}
+
+				
+			})
+
+			// Boundary rectangle
+			ctx.beginPath();
+			ctx.moveTo( xToPx( Xmin ) , yToPy( Ymin ) );
+			ctx.lineTo( xToPx( Xmin ) , yToPy( Ymax ) );
+			ctx.lineTo( xToPx( Xmax ) , yToPy( Ymax ) );
+			ctx.lineTo( xToPx( Xmax ) , yToPy( Ymin ) );
+			ctx.lineTo( xToPx( Xmin ) , yToPy( Ymin ) );
+			ctx.closePath();
+			ctx.strokeStyle = 'red';
+			ctx.stroke();
+
+		}
+		cGraph.addEventListener('mousedown', (e) => {
+			t.mouseDown(e.clientX ,  e.clientY)
+		});
+
+		cGraph.addEventListener('mousemove', (e) => {
+			if(t.isDragging ){
+				t.mouseMove( e.clientX, e.clientY )
+				draw();
+			}
+		});
+
+		cGraph.addEventListener('mouseup', () => {
+			t.isDragging = false;
+		});
+
+		cGraph.addEventListener('mouseleave', () => {
+			t.isDragging = false;
+		});
+
+		// Добавляем событие для вращения колесика мыши
+		cGraph.addEventListener('wheel', (e) => {
+			t.mouseWheel(e.deltaY)
+			draw();
+			e.preventDefault();
+		});
+
+		window.addEventListener('resize', () => {
+			const w = cGraph.clientWidth
+			const h = cGraph.clientHeight
+
+			t.resize(w,h)
+			draw()
+		});
+
+
+
+		draw();
+
+		// Loging
+		function addListItem(domElement, text){
+
+			const newParagraph = document.createElement('p');
+			newParagraph.textContent = text;
+
+			domElement.appendChild(newParagraph);
+			
+		}
+		function log(text){
+			addListItem(cLog, text)
+		}
+
+
+
+	</script>
+
+	
+
+</body>
+</html>
