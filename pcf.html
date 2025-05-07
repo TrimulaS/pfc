@@ -7,6 +7,11 @@
 
 <!-- 
 Resize 
+
+area			|
+c-tree			|
+________________|
+
 -->
 
 <style>
@@ -21,11 +26,11 @@ Resize
 	} 
 
 	#pra {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100vw;
+		height: 100vh;
 	}
 
 	#c-main {
@@ -33,19 +38,23 @@ Resize
 		width: calc(100% - 10px);
 		height: calc(100% - 10px);
 		margin: 5px;
-		background-color: aqua;
+		background-color: rgb(185, 253, 253);
 	}
 
 	#c-nodes {
 		display: flex;
 		flex-direction: column;
-		width: 50%; /* Занимает половину ширины */
+		/* width: 50%;  */
 		height: 100%;
 	}
 
 	#c-tree, #c-prop {
 		flex: 1;
 		border: 1px solid red; /* Для отладки */
+	}
+	#c-tree {
+		display: flex;
+		flex-direction: column-reverse;
 	}
 
 	#c-tree p,
@@ -68,6 +77,33 @@ Resize
 		border: solid 1px darkgreen;
 
 	}
+	.wrapper{
+		display: flex;
+		flex: 1;
+	}
+
+
+	.sidebar {
+		display: flex;
+		flex-direction: row; /* Вертикальная ориентация */
+		background-color: #fff; /* Цвет фона панели */
+		padding: 2px; /* Внутренние отступы */
+		border: 1px solid #ccc; /* Рамка панели */
+		border-radius: 5px; /* Закругленные углы */
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
+	}
+
+	.button {
+		padding: 5px 10px; /* Внутренние отступы кнопок */
+		margin-bottom: 5px; /* Отступ между кнопками */
+		background-color: #007bff; /* Цвет фона кнопок */
+		color: rgb(36, 44, 29); /* Цвет текста кнопок */
+		border: none; /* Убираем рамку */
+		border-radius: 5px; /* Закругленные углы кнопок */
+		cursor: pointer; /* Указатель при наведении */
+		transition: background-color 0.3s; /* Плавный переход цвета фона */
+	}
+
 
 
 </style>
@@ -91,16 +127,25 @@ Shape
 
 	<div id = 'pra'>
 		<div id = 'c-main' class="container">
-			<div id = 'c-nodes' class="container">
-				<div>
-					<div></div>
-					<div id = 'c-tree' class="container"></div>
+			<div class="container">
+				<div class="sidebar">
+					<button id = 'bInit' class="button">Initialize</button>
+					<button id = 'bReCreate' class="button">reCreate</button>
+					<button class="button">Кнопка 3</button>
+					<button class="button">Кнопка 4</button>
 				</div>
-				
-				<div id = 'c-log' class="container"></div>
+				<div id = 'c-nodes' class="container">
+					<div id = 'c-tree' class="container"></div>
+					<div id = 'c-log' class="container"></div>
+				</div>
+
 			</div>
-			<!-- <div id = 'c-graph' class="container "></div> -->
-			<canvas id="c-graph" class="container"></canvas>
+
+
+
+			<div> <!-- Extra div because splitter will add its own class -->
+				<canvas id="c-graph" class="container"></canvas>
+			</div>
 		</div>
 	</div>
 
@@ -210,13 +255,14 @@ Shape
 		cGraph.height = cGraph.clientHeight; // Установка высоты canvas
 		const ctx = cGraph.getContext('2d');
 
-		// Define k and shift to display full staff
-		let Wv = cGraph.clientWidth
-		let Hv = cGraph.clientHeight
-
-		let t = new Transform2D(Wv, Hv, Xmin, Xmax, Ymin, Ymax);
+		//let t = new Transform2D(cGraph.clientWidth, cGraph.clientHeight, Xmin, Xmax, Ymin, Ymax);
+		let t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
 		const xToPx = t.xToPx.bind(t)			// Binding methods for convinience
 		const yToPy = t.yToPy.bind(t)
+
+
+
+
 
 		function draw(){
 			cTree.innerHTML=''
@@ -224,10 +270,11 @@ Shape
 			
 
 			shapes.forEach(s =>{
+				// Skip tiny shapes
 				if (s.width * t.k < 5 && s.height * t.k < 5) {
-					return; // Пропускаем слишком маленькие фигуры
+					return; 
 				}
-
+				// Skip shapes out of viwport
 				if (
 					s.left + s.width >= t.visibleLeft &&
 					s.left 			 <= t.visibleRight &&
@@ -293,6 +340,10 @@ Shape
 			ctx.stroke();
 
 		}
+
+
+
+		// Add listeners
 		cGraph.addEventListener('mousedown', (e) => {
 			t.mouseDown(e.clientX ,  e.clientY)
 		});
@@ -319,17 +370,32 @@ Shape
 			e.preventDefault();
 		});
 
-		window.addEventListener('resize', () => {
-			const w = cGraph.clientWidth
-			const h = cGraph.clientHeight
+		// Resize canvas
+		const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                // Получаем новые размеры элемента
+                const { width, height } = entry.contentRect;
+				//t.resize(width, height)
+				draw()
+                console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
+            }
+        });
 
-			t.resize(w,h)
-			draw()
-		});
+        // Начинаем наблюдение за элементом
+        resizeObserver.observe(cGraph);
+
+		// window.addEventListener('resize', () => {
+		// 	const w = cGraph.clientWidth
+		// 	const h = cGraph.clientHeight
+
+		// 	t.resize(w,h)
+		// 	draw()
+		// });
 
 
 
 		draw();
+
 
 		// Loging
 		function addListItem(domElement, text){
@@ -346,6 +412,18 @@ Shape
 
 
 
+
+		// Manage
+		document.getElementById('bInit').addEventListener('click', function() {
+				t.initScale();
+				draw();
+				//alert('Hello');
+			});
+		document.getElementById('bReCreate').addEventListener('click', function() {
+			    t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
+				draw();
+				//alert('Hello');
+			});
 	</script>
 
 	
