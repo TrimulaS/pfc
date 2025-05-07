@@ -122,6 +122,7 @@ Shape
 -->
 
 <body>
+	<script src = './js/shapes.js'>	</script>
 	<script src = './js/split2.js'>	</script>
 	<script src = './js/transform2D.js'>	</script>
 
@@ -129,10 +130,12 @@ Shape
 		<div id = 'c-main' class="container">
 			<div class="container">
 				<div class="sidebar">
+					
+					<input type="number" id="numberOfShapes" value="100" min="0" max="10000" step="10" size="6">
 					<button id = 'bInit' class="button">Initialize</button>
 					<button id = 'bReCreate' class="button">reCreate</button>
-					<button class="button">Кнопка 3</button>
-					<button class="button">Кнопка 4</button>
+					<!-- <button class="button">Кнопка 3</button> -->
+					<!-- <button class="button">Кнопка 4</button> -->
 				</div>
 				<div id = 'c-nodes' class="container">
 					<div id = 'c-tree' class="container"></div>
@@ -159,6 +162,7 @@ Shape
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
 		const cGraph = document.getElementById('c-graph');
+		const inumberOfShapes = document.getElementById('numberOfShapes');
 
 
 		new Split2().insertSplitter( cMain, 'row', 0.4);
@@ -170,61 +174,15 @@ Shape
 		}
 
 		// Shapes parameters
-		const shapesNum = 800
-		let Xmin = 60
-		let Xmax = 1000
-		let Ymin = 20
-		let Ymax = 600
+		const shapesNum = parseInt(inumberOfShapes.value);
+
+	
+		// Generate 
+		const sSet = new ShapeSet(shapesNum , 60, 1000 , 30, 500)
+		const shapes = sSet.shapes
 
 
-		
-		class Shape{
-			constructor(type, left, top, color = 'blue', id=''){
-				this.type = type
-				this.left = Math.floor(left)
-				this.top = Math.floor(top)
-				this.width =  Math.floor	(Math.random() * 60 + 1)
-				this.height =  Math.floor	(Math.random() * 20 + 1)
-				this.color = color
-				if(id=='') this.id =  Math.floor(Math.random() * 9999 + 1)
-				
-			}
-			getBoundingClientRect(){
-				return this.boundingRect;
-			}
-			toString(){
-				return `shape:${this.shape}: ${this.left} x ${this.top}  [ ${this.width} x ${this.height} ]`
-			}
-		}
-
-		const shapes = []
-
-		// Fill up with random
-		for(let i = 0; i< shapesNum; i++){
-			
-			let type;
-			switch (Math.floor(Math.random() * 4)) {
-				case 0:
-					type = 'circle';
-					break;
-				case 1:
-					type = 'rect';
-					break;
-				case 2:
-					type = 'line';
-					break;
-				case 3:
-					type = 'point';
-					break;
-				default:
-					type = 'none'; // Этот случай фактически не будет достигнут
-			}
-			const color = `rgba(${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.random().toFixed(2)})`;
-			shapes.push( new Shape (type, Xmin + Math.random() * (Xmax - Xmin), Ymin + Math.random() * (Ymax - Ymin), color))
-		}
-
-			
-		
+		log(`Boundaries ${sSet.Xmin} x ${sSet.Ymin} .. ${sSet.Xmax} x ${sSet.Ymax}`)
 		
 		
 		//Processing
@@ -234,20 +192,6 @@ Shape
 		// 	log(element.toString())
 		// })
 
-		//Define whole shapes bounds:
-		Xmin = shapes[0].left
-		Xmax = shapes[0].left + shapes[0].width
-		Ymin = shapes[0].top
-		Ymax = shapes[0].top  + shapes[0].height
-
-		for(let i = 1; i< shapes.length; i++){
-			const s = shapes[i]
-			if(Xmin > s.left) Xmin = s.left
-			if(Xmax < s.left + s.width ) Xmax = s.left + s.width
-			if(Ymin > s.top) Ymin = s.top
-			if(Ymax < s.top + s.height ) Ymax = s.top + s.height
-		}
-		log(`Boundaries ${Xmin} x ${Ymin} .. ${Xmax} x ${Ymax}`)
 
 
 
@@ -256,7 +200,7 @@ Shape
 		const ctx = cGraph.getContext('2d');
 
 		//let t = new Transform2D(cGraph.clientWidth, cGraph.clientHeight, Xmin, Xmax, Ymin, Ymax);
-		let t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
+		let t = new Transform2D(cGraph, sSet.Xmin, sSet.Xmax, sSet.Ymin, sSet.Ymax);
 		const xToPx = t.xToPx.bind(t)			// Binding methods for convinience
 		const yToPy = t.yToPy.bind(t)
 
@@ -275,11 +219,12 @@ Shape
 					return; 
 				}
 				// Skip shapes out of viwport
+				const delta = 10						//!!!!!!!!!!!!! for debug to see when shape disappeared
 				if (
-					s.left + s.width >= t.visibleLeft &&
-					s.left 			 <= t.visibleRight &&
-					s.top + s.height >= t.visibleTop &&
-					s.top 			 <= t.visibleBottom
+					s.left + s.width - delta >= t.visibleLeft &&
+					s.left 	         + delta <= t.visibleRight &&
+					s.top + s.height - delta>= t.visibleTop &&
+					s.top 			 + delta<= t.visibleBottom
 				) {
 
 					// Drawing shape
@@ -328,16 +273,16 @@ Shape
 				
 			})
 
-			// Boundary rectangle
-			ctx.beginPath();
-			ctx.moveTo( xToPx( Xmin ) , yToPy( Ymin ) );
-			ctx.lineTo( xToPx( Xmin ) , yToPy( Ymax ) );
-			ctx.lineTo( xToPx( Xmax ) , yToPy( Ymax ) );
-			ctx.lineTo( xToPx( Xmax ) , yToPy( Ymin ) );
-			ctx.lineTo( xToPx( Xmin ) , yToPy( Ymin ) );
-			ctx.closePath();
-			ctx.strokeStyle = 'red';
-			ctx.stroke();
+			// // Boundary rectangle
+			// ctx.beginPath();
+			// ctx.moveTo( xToPx( Xmin ) , yToPy( Ymin ) );
+			// ctx.lineTo( xToPx( Xmin ) , yToPy( Ymax ) );
+			// ctx.lineTo( xToPx( Xmax ) , yToPy( Ymax ) );
+			// ctx.lineTo( xToPx( Xmax ) , yToPy( Ymin ) );
+			// ctx.lineTo( xToPx( Xmin ) , yToPy( Ymin ) );
+			// ctx.closePath();
+			// ctx.strokeStyle = 'red';
+			// ctx.stroke();
 
 		}
 
@@ -420,7 +365,7 @@ Shape
 				//alert('Hello');
 			});
 		document.getElementById('bReCreate').addEventListener('click', function() {
-			    t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
+			    // t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
 				draw();
 				//alert('Hello');
 			});
