@@ -16,7 +16,7 @@ class Transform2D {
 		this.Ymin = Ymin;
 		this.Ymax = Ymax;
 
-		this.padding = 30;
+		this.padding = 30;			//Padding for inintialcentring
 		this.zoomFactor = 1.1;
 		this.clearPadding = 20;
 
@@ -34,22 +34,40 @@ class Transform2D {
 	}
 
 	initScale() {
+
+
 		const { Xmin, Xmax, Ymin, Ymax, padding, Wv, Hv } = this;
 
-		if (Wv / (Xmax - Xmin + padding * 2) > Hv / (Ymax - Ymin + padding * 2)) {
-			this.k = Hv / (Ymax - Ymin + padding * 2);
-		} else {
-			this.k = Wv / (Xmax - Xmin + padding * 2);
-		}
-
+		const width = Xmax - Xmin + padding * 2;
+		const height = Ymax - Ymin + padding * 2;
+	
+		this.k = Math.min(Wv / width, Hv / height);
 		this.kOld = this.k;
-
-		// Центрируем видимую область с учетом padding
-		this.pxShift = -this.k * (Xmin - padding);
-		this.pyShift = -this.k * (Ymin - padding);
-
+	
+		const centerX = (Xmin + Xmax) / 2;
+		const centerY = (Ymin + Ymax) / 2;
+	
+		this.pxShift = Wv / 2 - this.k * centerX;
+		this.pyShift = Hv / 2 - this.k * centerY;
+	
 		this.calcVisibleRanges();
+
 	}
+	centrlize(){
+
+		const { Xmin, Xmax, Ymin, Ymax, padding, Wv, Hv } = this;
+
+		const width = Xmax - Xmin + padding * 2;
+		const height = Ymax - Ymin + padding * 2;
+
+		const centerX = (Xmin + Xmax) / 2;
+		const centerY = (Ymin + Ymax) / 2;
+	
+		this.pxShift = Wv / 2 - this.k * centerX;
+		this.pyShift = Hv / 2 - this.k * centerY;
+
+	}
+
 
 	xToPx(x) {
 		return this.pxShift + this.k * x;
@@ -99,35 +117,29 @@ class Transform2D {
 
 	// Новый resize: сохраняет отображаемую геометрию
 	resize(newW, newH) {
-		const canvas = this.canvas;
-
-		// Координаты левого верхнего угла canvas на странице
-		const rect = canvas.getBoundingClientRect();
-		const pageX = rect.left;
-		const pageY = rect.top;
-
-		// Сохраняем геометрические координаты, которые отображались в левом верхнем углу
-		const Xvis = (0 - this.pxShift) / this.k;
-		const Yvis = (0 - this.pyShift) / this.k;
-
-		// Обновляем размеры
+		this.canvas.width = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientHeight;
 		this.Wv = newW;
 		this.Hv = newH;
-
-		// Пересчитываем масштаб по тем же правилам
-		this.kOld = this.k;
-
-		if (newW / (this.Xmax - this.Xmin + this.padding * 2) > newH / (this.Ymax - this.Ymin + this.padding * 2)) {
-			this.k = newH / (this.Ymax - this.Ymin + this.padding * 2);
-		} else {
-			this.k = newW / (this.Xmax - this.Xmin + this.padding * 2);
-		}
-
-		// Пересчитываем смещение так, чтобы Xvis, Yvis остались на прежнем месте
-		this.pxShift = -this.k * Xvis;
-		this.pyShift = -this.k * Yvis;
-
+	
+		// const visibleWidth = this.visibleRight - this.visibleLeft;
+		// const visibleHeight = this.visibleBottom - this.visibleTop;
+	
+		// this.k = Math.min(
+		// 	this.Wv / (visibleWidth + 2 * this.clearPadding),
+		// 	this.Hv / (visibleHeight + 2 * this.clearPadding)
+		// );
+		// this.kOld = this.k;
+	
+		// this.pxShift = -this.k * (this.visibleLeft - this.clearPadding);
+		// this.pyShift = -this.k * (this.visibleTop - this.clearPadding);
+	
 		this.calcVisibleRanges();
-        this.initScale();
+
 	}
 }
+
+
+
+// cGraph.width = cGraph.clientWidth; // Установка ширины canvas
+// cGraph.height = cGraph.clientHeight; // Установка высоты canvas

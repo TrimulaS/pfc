@@ -65,15 +65,16 @@ ________________|
 	}
 
 	#c-graph {
-		flex: 1;
-		border: 1px solid blue; /* Для отладки */
+		/* flex: 1;
+		border: 1px solid blue;  */
+		width: 100%; /* Занимает 100% ширины родителя */
+		height: 100%; /* Занимает 100% высоты родителя */
+		display: block; /* Убирает пробелы под canvas */
 	}
-
 
 	.container{
 		display: flex;
 		box-sizing: border-box;
-
 		border: solid 1px darkgreen;
 
 	}
@@ -82,11 +83,11 @@ ________________|
 		flex: 1;
 	}
 
-
 	.sidebar {
 		display: flex;
 		flex-direction: row; /* Вертикальная ориентация */
-		background-color: #fff; /* Цвет фона панели */
+		gap: 5px;
+		background-color:     #eee;; /* Цвет фона панели */
 		padding: 2px; /* Внутренние отступы */
 		border: 1px solid #ccc; /* Рамка панели */
 		border-radius: 5px; /* Закругленные углы */
@@ -94,8 +95,8 @@ ________________|
 	}
 
 	.button {
-		padding: 5px 10px; /* Внутренние отступы кнопок */
-		margin-bottom: 5px; /* Отступ между кнопками */
+		padding: 5px ; /* Внутренние отступы кнопок */
+
 		background-color: #007bff; /* Цвет фона кнопок */
 		color: rgb(36, 44, 29); /* Цвет текста кнопок */
 		border: none; /* Убираем рамку */
@@ -108,18 +109,7 @@ ________________|
 
 </style>
 
-<!--
 
-Shape
-	Sizes
-		Top
-		Left
-		Width
-		Height
-		Color
-
-
--->
 
 <body>
 	<script src = './js/shapes.js'>	</script>
@@ -132,7 +122,9 @@ Shape
 				<div class="sidebar">
 					
 					<input type="number" id="numberOfShapes" value="100" min="0" max="10000" step="10" size="6">
-					<button id = 'bInit' class="button">Initialize</button>
+					<button id = 'bGenerate' class="button">Generate</button>
+					<button id = 'bReset' class="button">Reset</button>
+					<button id = 'bCenter' class="button">Center</button>
 					<button id = 'bReCreate' class="button">reCreate</button>
 					<!-- <button class="button">Кнопка 3</button> -->
 					<!-- <button class="button">Кнопка 4</button> -->
@@ -168,26 +160,36 @@ Shape
 		new Split2().insertSplitter( cMain, 'row', 0.4);
 		new Split2().insertSplitter( cNodes, 'column', 0.7);
 
-
 		function rectToString(rect){
 			return ` ${rect.left}  :   ${rect.top}  _    ${rect.width}  x  ${rect.height}`
 		}
 
-		// Shapes parameters
-		const shapesNum = parseInt(inumberOfShapes.value);
+		// 1. Generate shape set
+		let shapesNum
+		let shapeSet
+		let t 
+		let xToPx
+		let yToPy
+
+		const ctx = cGraph.getContext('2d');
+
+		function generate(){
+			shapesNum = parseInt(inumberOfShapes.value);
+			shapeSet = new ShapeSet(shapesNum , 60, 1000 , 30, 500)
+			t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
+			xToPx = t.xToPx.bind(t)			// Binding methods for convinience
+		    yToPy = t.yToPy.bind(t)
+
+			draw();
+
+		}
+		generate()
+		log(`Boundaries ${shapeSet.Xmin} x ${shapeSet.Ymin} .. ${shapeSet.Xmax} x ${shapeSet.Ymax}`)
 
 	
-		// Generate 
-		const sSet = new ShapeSet(shapesNum , 60, 1000 , 30, 500)
-		const shapes = sSet.shapes
-
-
-		log(`Boundaries ${sSet.Xmin} x ${sSet.Ymin} .. ${sSet.Xmax} x ${sSet.Ymax}`)
 		
-		
-		//Processing
-		 
-		// shapes.forEach(element =>{
+		// //Processing
+		// shapeSet.shapes.forEach(element =>{
 		// 	//ta.textContent += element.toString()
 		// 	log(element.toString())
 		// })
@@ -195,25 +197,26 @@ Shape
 
 
 
-		cGraph.width = cGraph.clientWidth; // Установка ширины canvas
-		cGraph.height = cGraph.clientHeight; // Установка высоты canvas
-		const ctx = cGraph.getContext('2d');
 
-		//let t = new Transform2D(cGraph.clientWidth, cGraph.clientHeight, Xmin, Xmax, Ymin, Ymax);
-		let t = new Transform2D(cGraph, sSet.Xmin, sSet.Xmax, sSet.Ymin, sSet.Ymax);
-		const xToPx = t.xToPx.bind(t)			// Binding methods for convinience
-		const yToPy = t.yToPy.bind(t)
+		
+		
 
+		
+	
 
 
 
 
 		function draw(){
+			// // ОБЯЗАТЕЛЬНО! Иначе canvas "сплющится" или "растянется"
+			// cGraph.width = cGraph.clientWidth;
+			// cGraph.height = cGraph.clientHeight;
+
 			cTree.innerHTML=''
 			ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
 			
 
-			shapes.forEach(s =>{
+			shapeSet.shapes.forEach(s =>{
 				// Skip tiny shapes
 				if (s.width * t.k < 5 && s.height * t.k < 5) {
 					return; 
@@ -264,13 +267,8 @@ Shape
 							console.log('(!) Wrong shape type')	
 						    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
 					}
-
-
-					
-					// ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * k, s.height * k);
+	
 				}
-
-				
 			})
 
 			// // Boundary rectangle
@@ -318,11 +316,14 @@ Shape
 		// Resize canvas
 		const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-                // Получаем новые размеры элемента
-                const { width, height } = entry.contentRect;
-				//t.resize(width, height)
+                // // Получаем новые размеры элемента
+                // const { width, height } = entry.contentRect;
+				// 	// ОБЯЗАТЕЛЬНО! Иначе canvas "сплющится" или "растянется"
+				// cGraph.width = cGraph.clientWidth;
+				// cGraph.height = cGraph.clientHeight;
+				t.resize(cGraph.clientWidth, cGraph.clientHeight)
 				draw()
-                console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
+                //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
             }
         });
 
@@ -339,7 +340,7 @@ Shape
 
 
 
-		draw();
+		
 
 
 		// Loging
@@ -355,14 +356,21 @@ Shape
 			addListItem(cLog, text)
 		}
 
-
+		
 
 
 		// Manage
-		document.getElementById('bInit').addEventListener('click', function() {
+		document.getElementById('bGenerate').addEventListener('click', function() {
+				generate();
+			});
+		document.getElementById('bReset').addEventListener('click', function() {
 				t.initScale();
 				draw();
-				//alert('Hello');
+			});
+		document.getElementById('bCenter').addEventListener('click', function() {
+				t.centrlize()
+				draw();
+
 			});
 		document.getElementById('bReCreate').addEventListener('click', function() {
 			    // t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);

@@ -2,6 +2,18 @@
 
 //undefined
 
+/*
+
+Shape
+	Sizes
+		Top
+		Left
+		Width
+		Height
+		Color
+
+*/
+
 class Shape{
     static num = 0
     constructor(type, color = 'blue', left = 0, top = 0 , width = 10, height = 10,  id=''){
@@ -32,10 +44,15 @@ class Shape{
 
 class ShapeRandom extends Shape {
     constructor(Xmin_i, Xmax_i, Ymin_i, Ymax_i) {
+
+        const shapeMaxW = ( Xmax_i - Xmin_i ) / 10          // Shape width is about 100 of alowed are width
+        const shapeMaxH = ( Ymax_i - Ymin_i ) / 10
+
         const left = Xmin_i + Math.random() * (Xmax_i - Xmin_i);
-        const top = Ymin_i + Math.random() * (Ymax_i - Ymin_i);
-        const width = Math.floor(Math.random() * (Xmax_i - Xmin_i) + 1);
-        const height = Math.floor(Math.random() * (Ymax_i - Ymin_i) + 1);
+        const top  = Ymin_i + Math.random() * (Ymax_i - Ymin_i);
+        const width  = Math.floor(Math.random() * shapeMaxW )           //  Math.floor(Math.random() * (Xmax_i - Xmin_i) + 1);
+        const height = Math.floor(Math.random() * shapeMaxH )           //Math.floor(Math.random() * (Ymax_i - Ymin_i) + 1);
+
         const color = ShapeRandom.getColor()
         let type;
         switch (Math.floor(Math.random() * 4)) {
@@ -53,7 +70,6 @@ class ShapeRandom extends Shape {
 
     }
 }
-
 
 
 
@@ -81,13 +97,12 @@ class ShapeSet{
         this.shapesNum = shapesNum
 
         this.fillRandomly(shapesNum)
-        this.fillWithSquares(shapesNum)
+        //this.fillWithSquares(shapesNum)
         this.defineBoundaries(shapesNum)
 			
     }
     fillRandomly(shapesNum){
 		for(let i = 0; i< shapesNum; i++){
-			
 			this.shapes.push( new ShapeRandom (this.Xmin_i, this.Xmax_i, this.Ymin_i, this.Ymax_i))
 		}
     }
