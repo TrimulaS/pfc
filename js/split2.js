@@ -248,6 +248,9 @@ class Split2 {
 
     configureSplitter(splitterDiv, direction = 'row', position = 0.5) {
 
+        //For parent resize correction
+        this.position = position;
+
         this.splitter = splitterDiv
         this.parent   = this.splitter.parentElement
         this.areaPrev = this.splitter.previousElementSibling
@@ -302,7 +305,57 @@ class Split2 {
         areaNext.style.flex = `0 0 calc(${sizeNext}px)`;
         
         this.addListeners(splitter);
+
+        if (!this.resizeObserver) {
+            this.resizeObserver = new ResizeObserver(() => {
+                this.#adjustAreasOnResize();
+            });
+            this.resizeObserver.observe(this.parent);
+        }
+        
     }
+
+    #adjustAreasOnResize() {
+        this.#updateSibilingElements(this.splitter);
+    
+        const {
+            parentContentArea,
+            prevMarginBox,
+            splitterMarginBox,
+            nextMarginBox,
+            gap,
+            splitNum,
+            sumMarginWidth,
+            sumMarginHeight
+        } = this;
+    
+        let sizePrev = 0;
+        let sizeNext = 0;
+    
+        const direction = this.parent.style.flexDirection;
+    
+        if (direction === 'row') {
+            if (splitNum > 1) {
+                sizePrev = (parentContentArea.width - Split2.splitterSize * splitNum - gap * 2 * splitNum - sumMarginWidth) / (splitNum + 1);
+                sizeNext = sizePrev;
+            } else {
+                sizePrev = parentContentArea.width * this.position - prevMarginBox.sumMarginHorizontal - splitterMarginBox.width / 2 - gap;
+                sizeNext = parentContentArea.width * (1 - this.position) - nextMarginBox.sumMarginHorizontal - splitterMarginBox.width / 2 - gap;
+            }
+        } else if (direction === 'column') {
+            if (splitNum > 1) {
+                sizePrev = (parentContentArea.height - Split2.splitterSize * splitNum - gap * 2 * splitNum - sumMarginHeight) / (splitNum + 1);
+                sizeNext = sizePrev;
+            } else {
+                sizePrev = parentContentArea.height * this.position - prevMarginBox.sumMarginVertical - splitterMarginBox.height / 2 - gap;
+                sizeNext = parentContentArea.height * (1 - this.position) - nextMarginBox.sumMarginVertical - splitterMarginBox.height / 2 - gap;
+            }
+        }
+    
+        this.areaPrev.style.flex = `0 0 calc(${sizePrev}px)`;
+        this.areaNext.style.flex = `0 0 calc(${sizeNext}px)`;
+    }
+    
 
     #getContentArea(element){
         const computedStyle = window.getComputedStyle(element);

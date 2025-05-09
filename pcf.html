@@ -104,7 +104,17 @@ ________________|
 		cursor: pointer; /* Указатель при наведении */
 		transition: background-color 0.3s; /* Плавный переход цвета фона */
 	}
+	.flex-column{
+		display: flex;
+		flex-direction: column; 
+	}
+	.flex-row{
+		display: flex;
+		flex-direction: row; 
+		width: 100%;
 
+
+	}
 
 
 </style>
@@ -116,16 +126,22 @@ ________________|
 	<script src = './js/split2.js'>	</script>
 	<script src = './js/transform2D.js'>	</script>
 
-	<div id = 'pra'>
+	<div id = 'pra'  class="flex-column">
+		<div class="flex-row">
+			<label>
+                <input type="checkbox" id="cb-UpdateList" checked="checked">Update List
+            </label>
+
+		</div>
 		<div id = 'c-main' class="container">
 			<div class="container">
 				<div class="sidebar">
 					
 					<input type="number" id="numberOfShapes" value="100" min="0" max="10000" step="10" size="6">
-					<button id = 'bGenerate' class="button">Generate</button>
-					<button id = 'bReset' class="button">Reset</button>
-					<button id = 'bCenter' class="button">Center</button>
-					<button id = 'bReCreate' class="button">reCreate</button>
+					<button id = 'b-Generate' class="button">Generate</button>
+					<button id = 'b-Reset' class="button">Reset</button>
+					<button id = 'b-Center' class="button">Center</button>
+					<button id = 'b-ReCreate' class="button">reCreate</button>
 					<!-- <button class="button">Кнопка 3</button> -->
 					<!-- <button class="button">Кнопка 4</button> -->
 				</div>
@@ -150,6 +166,7 @@ ________________|
 		// });
 		
 		const cMain = document.getElementById('c-main');
+		const cbUpdateList = document.getElementById('cb-UpdateList');
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
@@ -188,11 +205,11 @@ ________________|
 
 	
 		
-		// //Processing
-		// shapeSet.shapes.forEach(element =>{
-		// 	//ta.textContent += element.toString()
-		// 	log(element.toString())
-		// })
+		//Processing
+		shapeSet.shapes.forEach(element =>{
+			//ta.textContent += element.toString()
+			log(element.toString())
+		})
 
 
 
@@ -208,11 +225,12 @@ ________________|
 
 
 		function draw(){
-			// // ОБЯЗАТЕЛЬНО! Иначе canvas "сплющится" или "растянется"
-			// cGraph.width = cGraph.clientWidth;
-			// cGraph.height = cGraph.clientHeight;
 
-			cTree.innerHTML=''
+			cGraph.width  = cGraph.clientWidth;
+			cGraph.height = cGraph.clientHeight;
+
+
+			if(cbUpdateList.checked)cTree.innerHTML=''
 			ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
 			
 
@@ -222,7 +240,7 @@ ________________|
 					return; 
 				}
 				// Skip shapes out of viwport
-				const delta = 10						//!!!!!!!!!!!!! for debug to see when shape disappeared
+				const delta = 0						//for debug to see when shape disappeared
 				if (
 					s.left + s.width - delta >= t.visibleLeft &&
 					s.left 	         + delta <= t.visibleRight &&
@@ -231,7 +249,7 @@ ________________|
 				) {
 
 					// Drawing shape
-					addListItem(cTree, s.type + ' ' + s.id)
+					if(cbUpdateList.checked)addListItem(cTree, s.type + ' ' + s.id)
 
 					ctx.fillStyle = s.color
 
@@ -267,7 +285,46 @@ ________________|
 							console.log('(!) Wrong shape type')	
 						    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
 					}
-	
+
+
+
+					// === Draw shape ID in the center of its visible part ===
+					ctx.font = "12px sans-serif";
+					ctx.fillStyle = "black"; // Text color
+
+					// Calculate visible part of the shape within current viewport
+					const visibleLeft   = Math.max(s.left, t.visibleLeft);
+					const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
+					const visibleTop    = Math.max(s.top, t.visibleTop);
+					const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
+
+					const visibleWidth  = visibleRight - visibleLeft;
+					const visibleHeight = visibleBottom - visibleTop;
+
+					// Convert to pixels
+					const px = xToPx(visibleLeft + visibleWidth / 2);
+					const py = yToPy(visibleTop + visibleHeight / 2);
+
+					const text = s.id;
+					const textWidth = ctx.measureText(text).width;
+					const textHeight = 12; // Approximate height for 12px font
+
+					if (textWidth <= visibleWidth * t.k) {
+						// Horizontal text fits in width — draw centered
+						ctx.textAlign = "center";
+						ctx.textBaseline = "middle";
+						ctx.fillText(text, px, py);
+					} else if (textHeight <= visibleHeight * t.k) {
+						// Text doesn't fit horizontally, but fits vertically — rotate and draw
+						ctx.save();
+						ctx.translate(px, py);
+						ctx.rotate(-Math.PI / 2); // Rotate 90° counterclockwise
+						ctx.textAlign = "center";
+						ctx.textBaseline = "middle";
+						ctx.fillText(text, 0, 0);
+						ctx.restore();
+					}
+						
 				}
 			})
 
@@ -360,19 +417,19 @@ ________________|
 
 
 		// Manage
-		document.getElementById('bGenerate').addEventListener('click', function() {
+		document.getElementById('b-Generate').addEventListener('click', function() {
 				generate();
 			});
-		document.getElementById('bReset').addEventListener('click', function() {
+		document.getElementById('b-Reset').addEventListener('click', function() {
 				t.initScale();
 				draw();
 			});
-		document.getElementById('bCenter').addEventListener('click', function() {
+		document.getElementById('b-Center').addEventListener('click', function() {
 				t.centrlize()
 				draw();
 
 			});
-		document.getElementById('bReCreate').addEventListener('click', function() {
+		document.getElementById('b-ReCreate').addEventListener('click', function() {
 			    // t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
 				draw();
 				//alert('Hello');
@@ -383,3 +440,11 @@ ________________|
 
 </body>
 </html>
+
+<!-- 
+✓ Filtering shapes outside the viewport undesirable offset
+✓ No mechanism fo do not process overlapped shapes -  not needed forthe moment (webGL)
+
+1. Adding shapes depicting tie periods
+
+-->

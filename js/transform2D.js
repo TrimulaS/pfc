@@ -18,7 +18,7 @@ class Transform2D {
 
 		this.padding = 30;			//Padding for inintialcentring
 		this.zoomFactor = 1.1;
-		this.clearPadding = 20;
+		this.clearPadding = 0;		// Padding for check clear
 
 		this.k = 1;
 		this.kOld = 1;
@@ -79,6 +79,9 @@ class Transform2D {
 
 	calcVisibleRanges() {
 		const { Wv, Hv, k, pxShift, pyShift, clearPadding } = this;
+
+		this.canvas.width = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientHeight;
 
 		this.visibleLeft = (0 - pxShift) / k + clearPadding;
 		this.visibleTop = (0 - pyShift) / k + clearPadding;

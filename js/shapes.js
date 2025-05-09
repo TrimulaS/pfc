@@ -16,15 +16,16 @@ Shape
 
 class Shape{
     static num = 0
-    constructor(type, color = 'blue', left = 0, top = 0 , width = 10, height = 10,  id=''){
+    constructor(type, color, left = 0, top = 0 , width = 10, height = 10,  id='', notes = ''){
         this.type = type
         this.left = left
         this.top = top
         this.width = width
         this.height =  height
-        this.color = color
+        this.color = (color === undefined) ? ShapeRandom.getColor() : color;
         Shape.num++
         this.id = id === '' ? Shape.num : Shape.num + '_' + id; // Используем Shape.num
+        this.notes = notes
         
     }
     getBoundingClientRect(){
@@ -41,6 +42,23 @@ class Shape{
         return `shape:${this.type}: ${this.left} x ${this.top}  [ ${this.width} x ${this.height} ]`
     }
 }
+
+
+//new Shape('rect', undefined,  left,   top,    width,   height, id                  , notes)
+
+
+// new Shape('rect', undefined, 1000,   541000,    800,   541000,          'Фанерозой',     'Eon' )      //	от 541 млн лет назад до
+// new Shape('rect', undefined, 1000,  2500000,    800,  1959000,         'Протерозой',     'Eon' )      //	от 2.5 млрд до 541 млн лет назад
+// new Shape('rect', undefined, 1000,  4000000,    800,  1500000,              'Архей',     'Eon' )      //	от 4 до 2.5 млрд лет назад
+// new Shape('rect', undefined, 1000,  4600000,    800,   600000,   'Катархей (Гадей)',     'Eon' )      //  от 4.6 до 4 млрд лет назад
+
+
+
+
+
+
+
+
 
 class ShapeRandom extends Shape {
     constructor(Xmin_i, Xmax_i, Ymin_i, Ymax_i) {
@@ -96,9 +114,13 @@ class ShapeSet{
 
         this.shapesNum = shapesNum
 
-        this.fillRandomly(shapesNum)
+        //this.fillRandomly(shapesNum)
         //this.fillWithSquares(shapesNum)
+        this.fillExact()
+
+
         this.defineBoundaries(shapesNum)
+
 			
     }
     fillRandomly(shapesNum){
@@ -117,10 +139,78 @@ class ShapeSet{
 
                 const side = Math.max(w,h)
 
-                this.shapes.push( new Shape (type,ShapeRandom.getColor(), this.Xmin_i + side * i, this.Ymin_i + side * j, side * 0.8 ,side * 0.8))
+                this.shapes.push( new Shape (type,undefined, this.Xmin_i + side * i, this.Ymin_i + side * j, side * 0.8 ,side * 0.8))
             }
 		}
     }
+
+    fillExact(){
+
+        const data = [
+            { "id": "Фанерозой", "Start": 541, "End": 0, "Type": "Eon", "Shift": 0, "English": "Phanerozoic" },
+            { "id": "Протерозой", "Start": 2500000, "End": 541000, "Type": "Eon", "Shift": 0, "English": "Proterozoic" },
+            { "id": "Архей", "Start": 4000000, "End": 2500000, "Type": "Eon", "Shift": 0, "English": "Archean" },
+            { "id": "Катархей (Гадей)", "Start": 4600000, "End": 4000000, "Type": "Eon", "Shift": 0, "English": "Hadean" },
+          
+            { "id": "Кайнозой", "Start": 66, "End": 0, "Type": "Era", "Shift": 1000, "English": "Cenozoic" },
+            { "id": "Мезозой", "Start": 251902, "End": 66000, "Type": "Era", "Shift": 1000, "English": "Mesozoic" },
+            { "id": "Палеозой", "Start": 538800, "End": 251902, "Type": "Era", "Shift": 1000, "English": "Paleozoic" },
+            { "id": "Нео - протерозой", "Start": 1000000, "End": 538800, "Type": "Era", "Shift": 1000, "English": "Neoproterozoic" },
+            { "id": "Мезо - протерозой", "Start": 1600000, "End": 1000000, "Type": "Era", "Shift": 1000, "English": "Mesoproterozoic" },
+            { "id": "Палео - протерозой", "Start": 2500000, "End": 1600000, "Type": "Era", "Shift": 1000, "English": "Paleoproterozoic" },
+            { "id": "Неоархей", "Start": 2800000, "End": 2500000, "Type": "Era", "Shift": 1000, "English": "Neoarchean" },
+            { "id": "Мезоархей", "Start": 3200000, "End": 2800000, "Type": "Era", "Shift": 1000, "English": "Mesoarchean" },
+            { "id": "Палеоархей", "Start": 3600000, "End": 3200000, "Type": "Era", "Shift": 1000, "English": "Paleoarchean" },
+            { "id": "Эоархей", "Start": 4031000, "End": 3600000, "Type": "Era", "Shift": 1000, "English": "Eoarchean" },
+          
+            { "id": "Четвертичный  Антропоген", "Start": 2580, "End": 0, "Type": "Period", "Shift": 2000, "English": "Quaternary" },
+            { "id": "Неоген", "Start": 23000, "End": 2580, "Type": "Period", "Shift": 2000, "English": "Neogene" },
+            { "id": "Палеоген", "Start": 66000, "End": 23000, "Type": "Period", "Shift": 2000, "English": "Paleogene" },
+            { "id": "Мел", "Start": 145000, "End": 66000, "Type": "Period", "Shift": 2000, "English": "Cretaceous" },
+            { "id": "Юра", "Start": 201000, "End": 145000, "Type": "Period", "Shift": 2000, "English": "Jurassic" },
+            { "id": "Триас", "Start": 252000, "End": 201000, "Type": "Period", "Shift": 2000, "English": "Triassic" },
+            { "id": "Пермь", "Start": 299000, "End": 252000, "Type": "Period", "Shift": 2000, "English": "Permian" },
+            { "id": "Карбон", "Start": 359000, "End": 299000, "Type": "Period", "Shift": 2000, "English": "Carboniferous" },
+            { "id": "Девон", "Start": 420000, "End": 359000, "Type": "Period", "Shift": 2000, "English": "Devonian" },
+            { "id": "Силур", "Start": 443000, "End": 420000, "Type": "Period", "Shift": 2000, "English": "Silurian" },
+            { "id": "Ордовик", "Start": 487000, "End": 443000, "Type": "Period", "Shift": 2000, "English": "Ordovician" },
+            { "id": "Кембрий", "Start": 539000, "End": 487000, "Type": "Period", "Shift": 2000, "English": "Cambrian" },
+            { "id": "Эдиакарий (Венд)", "Start": 635000, "End": 539000, "Type": "Period", "Shift": 2000, "English": "Ediacaran" },
+            { "id": "Криогений", "Start": 720000, "End": 635000, "Type": "Period", "Shift": 2000, "English": "Cryogenian" },
+            { "id": "Тоний", "Start": 1000000, "End": 720000, "Type": "Period", "Shift": 2000, "English": "Tonian" },
+            { "id": "Стений", "Start": 1200000, "End": 1000000, "Type": "Period", "Shift": 2000, "English": "Stenian" },
+            { "id": "Эктазий", "Start": 1400000, "End": 1200000, "Type": "Period", "Shift": 2000, "English": "Ectasian" },
+            { "id": "Калимий", "Start": 1600000, "End": 1400000, "Type": "Period", "Shift": 2000, "English": "Calymmian" },
+            { "id": "Статерий", "Start": 1800000, "End": 1600000, "Type": "Period", "Shift": 2000, "English": "Statherian" },
+            { "id": "Орозирий", "Start": 2050000, "End": 1800000, "Type": "Period", "Shift": 2000, "English": "Orosirian" },
+            { "id": "Риасий", "Start": 2300000, "End": 2050000, "Type": "Period", "Shift": 2000, "English": "Rhyacian" },
+            { "id": "Сидерий", "Start": 2500000, "End": 2300000, "Type": "Period", "Shift": 2000, "English": "Siderian" }
+          ]
+
+
+
+          this.shapes.push( data.map(item => {
+            const { id, Start, End ,Type,Shift} = item;
+            console.log(id)
+            return new Shape('rect', undefined, Shift, End, 800, Start - End, id, Type);
+
+        }))
+
+
+
+
+
+        // this.shapes.push( new Shape('rect', undefined, 1000, this.Ymin_i, 1000,1000))
+        // this.shapes.push( new Shape('rect', undefined, 1000,   541000,    8000,   541000,          'Фанерозой',     'Eon' )  )    //	от 541 млн лет назад до
+        // this.shapes.push( new Shape('rect', undefined, 1000,  2500000,    8000,  1959000,         'Протерозой',     'Eon' )  )    //	от 2.5 млрд до 541 млн лет назад
+        // this.shapes.push( new Shape('rect', undefined, 1000,  4000000,    8000,  1500000,              'Архей',     'Eon' )  )    //	от 4 до 2.5 млрд лет назад
+        // this.shapes.push( new Shape('rect', undefined, 1000,  4600000,    8000,   600000,   'Катархей (Гадей)',     'Eon' )  )    //  от 4.6 до 4 млрд лет назад
+        
+        
+        
+
+    }
+
 
     defineBoundaries(){
         		//Define whole shapes bounds:
