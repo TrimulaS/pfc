@@ -130,6 +130,7 @@ ________________|
 		<div class="flex-row">
 			<label>
                 <input type="checkbox" id="cb-UpdateList" checked="checked">Update List
+				<input type="checkbox" id="cb-text-direction" checked="checked">Adopt text direction
             </label>
 
 		</div>
@@ -167,6 +168,7 @@ ________________|
 		
 		const cMain = document.getElementById('c-main');
 		const cbUpdateList = document.getElementById('cb-UpdateList');
+		const cbTextDirection = document.getElementById('cb-text-direction');
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
@@ -193,6 +195,7 @@ ________________|
 		function generate(){
 			shapesNum = parseInt(inumberOfShapes.value);
 			shapeSet = new ShapeSet(shapesNum , 60, 1000 , 30, 500)
+			log('Shpes in set: ' + shapeSet.shapes.length)
 			t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
 			xToPx = t.xToPx.bind(t)			// Binding methods for convinience
 		    yToPy = t.yToPy.bind(t)
@@ -209,6 +212,7 @@ ________________|
 		shapeSet.shapes.forEach(element =>{
 			//ta.textContent += element.toString()
 			log(element.toString())
+			//console.log(element.toString()+'------------ ')
 		})
 
 
@@ -292,6 +296,8 @@ ________________|
 					ctx.font = "12px sans-serif";
 					ctx.fillStyle = "black"; // Text color
 
+				
+
 					// Calculate visible part of the shape within current viewport
 					const visibleLeft   = Math.max(s.left, t.visibleLeft);
 					const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
@@ -309,12 +315,14 @@ ________________|
 					const textWidth = ctx.measureText(text).width;
 					const textHeight = 12; // Approximate height for 12px font
 
-					if (textWidth <= visibleWidth * t.k) {
+
+
+					if (textWidth <= visibleWidth * t.k ||   !cbTextDirection.checked) {
 						// Horizontal text fits in width — draw centered
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
 						ctx.fillText(text, px, py);
-					} else if (textHeight <= visibleHeight * t.k) {
+					} else if (textHeight <= visibleHeight * t.k  ) {
 						// Text doesn't fit horizontally, but fits vertically — rotate and draw
 						ctx.save();
 						ctx.translate(px, py);
@@ -405,6 +413,7 @@ ________________|
 
 			const newParagraph = document.createElement('p');
 			newParagraph.textContent = text;
+			//console.log(text)
 
 			domElement.appendChild(newParagraph);
 			
@@ -444,6 +453,7 @@ ________________|
 <!-- 
 ✓ Filtering shapes outside the viewport undesirable offset
 ✓ No mechanism fo do not process overlapped shapes -  not needed forthe moment (webGL)
+make relative coordinates not depandant from scale
 
 1. Adding shapes depicting tie periods
 

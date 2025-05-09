@@ -147,54 +147,62 @@ class ShapeSet{
     fillExact(){
 
         const data = [
-            { "id": "Фанерозой", "Start": 541, "End": 0, "Type": "Eon", "Shift": 0, "English": "Phanerozoic" },
-            { "id": "Протерозой", "Start": 2500000, "End": 541000, "Type": "Eon", "Shift": 0, "English": "Proterozoic" },
-            { "id": "Архей", "Start": 4000000, "End": 2500000, "Type": "Eon", "Shift": 0, "English": "Archean" },
-            { "id": "Катархей (Гадей)", "Start": 4600000, "End": 4000000, "Type": "Eon", "Shift": 0, "English": "Hadean" },
+            { "id": "Фанерозой", "Start": 541000, "End": 0, "Type": "Eon", "Shift": 1, "English": "Phanerozoic" },
+            { "id": "Протерозой", "Start": 2500000, "End": 541000, "Type": "Eon", "Shift": 1, "English": "Proterozoic" },
+            { "id": "Архей", "Start": 4000000, "End": 2500000, "Type": "Eon", "Shift": 1, "English": "Archean" },
+            { "id": "Катархей (Гадей)", "Start": 4600000, "End": 4000000, "Type": "Eon", "Shift": 1, "English": "Hadean" },
           
-            { "id": "Кайнозой", "Start": 66, "End": 0, "Type": "Era", "Shift": 1000, "English": "Cenozoic" },
-            { "id": "Мезозой", "Start": 251902, "End": 66000, "Type": "Era", "Shift": 1000, "English": "Mesozoic" },
-            { "id": "Палеозой", "Start": 538800, "End": 251902, "Type": "Era", "Shift": 1000, "English": "Paleozoic" },
-            { "id": "Нео - протерозой", "Start": 1000000, "End": 538800, "Type": "Era", "Shift": 1000, "English": "Neoproterozoic" },
-            { "id": "Мезо - протерозой", "Start": 1600000, "End": 1000000, "Type": "Era", "Shift": 1000, "English": "Mesoproterozoic" },
-            { "id": "Палео - протерозой", "Start": 2500000, "End": 1600000, "Type": "Era", "Shift": 1000, "English": "Paleoproterozoic" },
-            { "id": "Неоархей", "Start": 2800000, "End": 2500000, "Type": "Era", "Shift": 1000, "English": "Neoarchean" },
-            { "id": "Мезоархей", "Start": 3200000, "End": 2800000, "Type": "Era", "Shift": 1000, "English": "Mesoarchean" },
-            { "id": "Палеоархей", "Start": 3600000, "End": 3200000, "Type": "Era", "Shift": 1000, "English": "Paleoarchean" },
-            { "id": "Эоархей", "Start": 4031000, "End": 3600000, "Type": "Era", "Shift": 1000, "English": "Eoarchean" },
+            { "id": "Кайнозой", "Start": 66000, "End": 0, "Type": "Era", "Shift": 2, "English": "Cenozoic" },
+            { "id": "Мезозой", "Start": 251902, "End": 66000, "Type": "Era", "Shift": 2, "English": "Mesozoic" },
+            { "id": "Палеозой", "Start": 538800, "End": 251902, "Type": "Era", "Shift": 2, "English": "Paleozoic" },
+            { "id": "Нео - протерозой", "Start": 1000000, "End": 538800, "Type": "Era", "Shift": 2, "English": "Neoproterozoic" },
+            { "id": "Мезо - протерозой", "Start": 1600000, "End": 1000000, "Type": "Era", "Shift": 2, "English": "Mesoproterozoic" },
+            { "id": "Палео - протерозой", "Start": 2500000, "End": 1600000, "Type": "Era", "Shift": 2, "English": "Paleoproterozoic" },
+            { "id": "Неоархей", "Start": 2800000, "End": 2500000, "Type": "Era", "Shift": 2, "English": "Neoarchean" },
+            { "id": "Мезоархей", "Start": 3200000, "End": 2800000, "Type": "Era", "Shift": 2, "English": "Mesoarchean" },
+            { "id": "Палеоархей", "Start": 3600000, "End": 3200000, "Type": "Era", "Shift": 2, "English": "Paleoarchean" },
+            { "id": "Эоархей", "Start": 4031000, "End": 3600000, "Type": "Era", "Shift": 2, "English": "Eoarchean" },
           
-            { "id": "Четвертичный  Антропоген", "Start": 2580, "End": 0, "Type": "Period", "Shift": 2000, "English": "Quaternary" },
-            { "id": "Неоген", "Start": 23000, "End": 2580, "Type": "Period", "Shift": 2000, "English": "Neogene" },
-            { "id": "Палеоген", "Start": 66000, "End": 23000, "Type": "Period", "Shift": 2000, "English": "Paleogene" },
-            { "id": "Мел", "Start": 145000, "End": 66000, "Type": "Period", "Shift": 2000, "English": "Cretaceous" },
-            { "id": "Юра", "Start": 201000, "End": 145000, "Type": "Period", "Shift": 2000, "English": "Jurassic" },
-            { "id": "Триас", "Start": 252000, "End": 201000, "Type": "Period", "Shift": 2000, "English": "Triassic" },
-            { "id": "Пермь", "Start": 299000, "End": 252000, "Type": "Period", "Shift": 2000, "English": "Permian" },
-            { "id": "Карбон", "Start": 359000, "End": 299000, "Type": "Period", "Shift": 2000, "English": "Carboniferous" },
-            { "id": "Девон", "Start": 420000, "End": 359000, "Type": "Period", "Shift": 2000, "English": "Devonian" },
-            { "id": "Силур", "Start": 443000, "End": 420000, "Type": "Period", "Shift": 2000, "English": "Silurian" },
-            { "id": "Ордовик", "Start": 487000, "End": 443000, "Type": "Period", "Shift": 2000, "English": "Ordovician" },
-            { "id": "Кембрий", "Start": 539000, "End": 487000, "Type": "Period", "Shift": 2000, "English": "Cambrian" },
-            { "id": "Эдиакарий (Венд)", "Start": 635000, "End": 539000, "Type": "Period", "Shift": 2000, "English": "Ediacaran" },
-            { "id": "Криогений", "Start": 720000, "End": 635000, "Type": "Period", "Shift": 2000, "English": "Cryogenian" },
-            { "id": "Тоний", "Start": 1000000, "End": 720000, "Type": "Period", "Shift": 2000, "English": "Tonian" },
-            { "id": "Стений", "Start": 1200000, "End": 1000000, "Type": "Period", "Shift": 2000, "English": "Stenian" },
-            { "id": "Эктазий", "Start": 1400000, "End": 1200000, "Type": "Period", "Shift": 2000, "English": "Ectasian" },
-            { "id": "Калимий", "Start": 1600000, "End": 1400000, "Type": "Period", "Shift": 2000, "English": "Calymmian" },
-            { "id": "Статерий", "Start": 1800000, "End": 1600000, "Type": "Period", "Shift": 2000, "English": "Statherian" },
-            { "id": "Орозирий", "Start": 2050000, "End": 1800000, "Type": "Period", "Shift": 2000, "English": "Orosirian" },
-            { "id": "Риасий", "Start": 2300000, "End": 2050000, "Type": "Period", "Shift": 2000, "English": "Rhyacian" },
-            { "id": "Сидерий", "Start": 2500000, "End": 2300000, "Type": "Period", "Shift": 2000, "English": "Siderian" }
+            { "id": "Четвертичный  Антропоген", "Start": 2580, "End": 0, "Type": "Period", "Shift": 3, "English": "Quaternary" },
+            { "id": "Неоген", "Start": 23000, "End": 2580, "Type": "Period", "Shift": 3, "English": "Neogene" },
+            { "id": "Палеоген", "Start": 66000, "End": 23000, "Type": "Period", "Shift": 3, "English": "Paleogene" },
+            { "id": "Мел", "Start": 145000, "End": 66000, "Type": "Period", "Shift": 3, "English": "Cretaceous" },
+            { "id": "Юра", "Start": 201000, "End": 145000, "Type": "Period", "Shift": 3, "English": "Jurassic" },
+            { "id": "Триас", "Start": 252000, "End": 201000, "Type": "Period", "Shift": 3, "English": "Triassic" },
+            { "id": "Пермь", "Start": 299000, "End": 252000, "Type": "Period", "Shift": 3, "English": "Permian" },
+            { "id": "Карбон", "Start": 359000, "End": 299000, "Type": "Period", "Shift": 3, "English": "Carboniferous" },
+            { "id": "Девон", "Start": 420000, "End": 359000, "Type": "Period", "Shift": 3, "English": "Devonian" },
+            { "id": "Силур", "Start": 443000, "End": 420000, "Type": "Period", "Shift": 3, "English": "Silurian" },
+            { "id": "Ордовик", "Start": 487000, "End": 443000, "Type": "Period", "Shift": 3, "English": "Ordovician" },
+            { "id": "Кембрий", "Start": 539000, "End": 487000, "Type": "Period", "Shift": 3, "English": "Cambrian" },
+            { "id": "Эдиакарий (Венд)", "Start": 635000, "End": 539000, "Type": "Period", "Shift": 3, "English": "Ediacaran" },
+            { "id": "Криогений", "Start": 720000, "End": 635000, "Type": "Period", "Shift": 3, "English": "Cryogenian" },
+            { "id": "Тоний", "Start": 1000000, "End": 720000, "Type": "Period", "Shift": 3, "English": "Tonian" },
+            { "id": "Стений", "Start": 1200000, "End": 1000000, "Type": "Period", "Shift": 3, "English": "Stenian" },
+            { "id": "Эктазий", "Start": 1400000, "End": 1200000, "Type": "Period", "Shift": 3, "English": "Ectasian" },
+            { "id": "Калимий", "Start": 1600000, "End": 1400000, "Type": "Period", "Shift": 3, "English": "Calymmian" },
+            { "id": "Статерий", "Start": 1800000, "End": 1600000, "Type": "Period", "Shift": 3, "English": "Statherian" },
+            { "id": "Орозирий", "Start": 2050000, "End": 1800000, "Type": "Period", "Shift": 3, "English": "Orosirian" },
+            { "id": "Риасий", "Start": 2300000, "End": 2050000, "Type": "Period", "Shift": 3, "English": "Rhyacian" },
+            { "id": "Сидерий", "Start": 2500000, "End": 2300000, "Type": "Period", "Shift": 3, "English": "Siderian" }
           ]
 
+          const m=100000
+
+            data.forEach(item => {
+                const { id, Start, End, Type, Shift } = item;
+                //constructor(type, color, left = 0, top = 0 , width = 10, height = 10,  id='', notes = '')
+                const shape = new Shape('rect', undefined, Shift*m, End, m, Start - End, id, Type);
+                this.shapes.push(shape); // Добавляем каждую фигуру отдельно
+            });
 
 
-          this.shapes.push( data.map(item => {
-            const { id, Start, End ,Type,Shift} = item;
-            console.log(id)
-            return new Shape('rect', undefined, Shift, End, 800, Start - End, id, Type);
+        //   this.shapes.push( data.map(item => {
+        //     const { id, Start, End ,Type,Shift} = item;
+        //     console.log(id)
+        //     return new Shape('rect', undefined, Shift, End, 800, Start - End, id, Type);
 
-        }))
+        // }))
 
 
 
