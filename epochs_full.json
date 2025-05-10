@@ -1,0 +1,274 @@
+[
+  {
+    "id": "Голоцен",
+    "Start": 11700,
+    "End": 0,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Holocene"
+  },
+  {
+    "id": "Плейстоцен",
+    "Start": 2580000,
+    "End": 11700,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Pleistocene"
+  },
+  {
+    "id": "Плиоцен",
+    "Start": 5333000,
+    "End": 2580000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Pliocene"
+  },
+  {
+    "id": "Миоцен",
+    "Start": 23030000,
+    "End": 5333000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Miocene"
+  },
+  {
+    "id": "Олигоцен",
+    "Start": 33900000,
+    "End": 23030000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Oligocene"
+  },
+  {
+    "id": "Эоцен",
+    "Start": 56000000,
+    "End": 33900000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Eocene"
+  },
+  {
+    "id": "Палеоцен",
+    "Start": 66000000,
+    "End": 56000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Paleocene"
+  },
+  {
+    "id": "Верхний",
+    "Start": 100500000,
+    "End": 66000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Late Cretaceous"
+  },
+  {
+    "id": "Нижний",
+    "Start": 145000000,
+    "End": 100500000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Early Cretaceous"
+  },
+  {
+    "id": "Верхняя (мальм)",
+    "Start": 163500000,
+    "End": 145000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Upper Jurassic"
+  },
+  {
+    "id": "Средняя (доггер)",
+    "Start": 174100000,
+    "End": 163500000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Middle Jurassic"
+  },
+  {
+    "id": "Нижняя (лейас)",
+    "Start": 201300000,
+    "End": 174100000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Lower Jurassic"
+  },
+  {
+    "id": "Верхний",
+    "Start": 237000000,
+    "End": 201300000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Late Triassic"
+  },
+  {
+    "id": "Средний",
+    "Start": 247200000,
+    "End": 237000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Middle Triassic"
+  },
+  {
+    "id": "Нижний",
+    "Start": 251900000,
+    "End": 247200000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Early Triassic"
+  },
+  {
+    "id": "Лопинский",
+    "Start": 259100000,
+    "End": 251900000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Lopingian"
+  },
+  {
+    "id": "Гваделупский",
+    "Start": 272950000,
+    "End": 259100000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Guadalupian"
+  },
+  {
+    "id": "Приуральский",
+    "Start": 298900000,
+    "End": 272950000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Cisuralian"
+  },
+  {
+    "id": "Пенсильванская",
+    "Start": 323200000,
+    "End": 298900000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Pennsylvanian"
+  },
+  {
+    "id": "Миссисипская",
+    "Start": 358900000,
+    "End": 323200000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Mississippian"
+  },
+  {
+    "id": "Верхний",
+    "Start": 382700000,
+    "End": 358900000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Late Devonian"
+  },
+  {
+    "id": "Средний",
+    "Start": 393300000,
+    "End": 382700000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Middle Devonian"
+  },
+  {
+    "id": "Нижний",
+    "Start": 419200000,
+    "End": 393300000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Early Devonian"
+  },
+  {
+    "id": "Пржидольский",
+    "Start": 423000000,
+    "End": 419200000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Pridoli"
+  },
+  {
+    "id": "Лудфордский",
+    "Start": 427400000,
+    "End": 423000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Ludfordian"
+  },
+  {
+    "id": "Венлокский",
+    "Start": 433400000,
+    "End": 427400000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Wenlock"
+  },
+  {
+    "id": "Лландоверийский",
+    "Start": 443800000,
+    "End": 433400000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Llandovery"
+  },
+  {
+    "id": "Верхний ордовик",
+    "Start": 458400000,
+    "End": 443800000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Upper Ordovician"
+  },
+  {
+    "id": "Средний ордовик",
+    "Start": 470000000,
+    "End": 458400000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Middle Ordovician"
+  },
+  {
+    "id": "Нижний ордовик",
+    "Start": 485400000,
+    "End": 470000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Lower Ordovician"
+  },
+  {
+    "id": "Фуронгский",
+    "Start": 497000000,
+    "End": 485400000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Furongian"
+  },
+  {
+    "id": "Отдел 3",
+    "Start": 510000000,
+    "End": 497000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Cambrian Series 3"
+  },
+  {
+    "id": "Отдел 2",
+    "Start": 521000000,
+    "End": 510000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Cambrian Series 2"
+  },
+  {
+    "id": "Терранёвский",
+    "Start": 542000000,
+    "End": 521000000,
+    "Type": "Epoch",
+    "Shift": 4,
+    "English": "Terreneuvian"
+  }
+]

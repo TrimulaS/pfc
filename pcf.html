@@ -298,36 +298,6 @@ ________________|
 
 						// === Рисуем ID фигуры по центру её видимой части ===
 
-						// function invertColor(color) {
-						// 	if (!color) return "black";
-
-						// 	// Проверка на rgba(...)
-						// 	const rgbaMatch = color.match(/^rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\s*\)$/i);
-						// 	if (rgbaMatch) {
-						// 		const r = 255 - parseInt(rgbaMatch[1]);
-						// 		const g = 255 - parseInt(rgbaMatch[2]);
-						// 		const b = 255 - parseInt(rgbaMatch[3]);
-						// 		const a = rgbaMatch[4] !== undefined ? parseFloat(rgbaMatch[4]) : 1.0;
-
-						// 		// Прозрачность не инвертируем
-						// 		return `rgba(${r}, ${g}, ${b}, ${a})`;
-						// 	}
-
-						// 	// Проверка на шестизначный HEX
-						// 	const hexMatch = color.match(/^#?([0-9A-Fa-f]{6})$/);
-						// 	if (hexMatch) {
-						// 		const hex = hexMatch[1];
-						// 		const r = 255 - parseInt(hex.slice(0, 2), 16);
-						// 		const g = 255 - parseInt(hex.slice(2, 4), 16);
-						// 		const b = 255 - parseInt(hex.slice(4, 6), 16);
-						// 		return `rgb(${r}, ${g}, ${b})`;
-						// 	}
-
-						// 	// Неизвестный формат
-						// 	return "black";
-						// }
-
-
 
 						// Видимая область фигуры
 						const visibleLeft   = Math.max(s.left, t.visibleLeft);
@@ -344,7 +314,6 @@ ________________|
 						const text = s.id;
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
-						console.log(s.color	)
 						ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
 
 						// Настройки размеров шрифта
