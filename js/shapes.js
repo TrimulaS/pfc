@@ -182,144 +182,333 @@ class ShapeSet{
 
     }
 
-    draw(cGraph){
-
+    draw(cGraph) {
         cGraph.width  = cGraph.clientWidth;
         cGraph.height = cGraph.clientHeight;
-
-
-        if(cbUpdateList.checked)cTree.innerHTML=''
+    
+        if (cbUpdateList.checked) cTree.innerHTML = '';
+    
         const ctx = cGraph.getContext('2d');
         ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
-        
-
-        this.shapes.forEach(s =>{
-            // Skip tiny shapes
-            if (s.width * t.k < 5 && s.height * t.k < 5) {
-                return; 
-            }
-            // Skip shapes out of viwport
-            const delta = 0						//for debug to see when shape disappeared
-            if (
+    
+        const visibleShapes = this.shapes.filter(s => {
+            if (s.width * t.k < 5 && s.height * t.k < 5) return false;
+            const delta = 0;
+            return (
                 s.left + s.width - delta >= t.visibleLeft &&
-                s.left 	         + delta <= t.visibleRight &&
-                s.top + s.height - delta>= t.visibleTop &&
-                s.top 			 + delta<= t.visibleBottom
-            ) {
-
-                // Drawing shape
-                if(cbUpdateList.checked)addListItem(cTree, s.type + ' ' + s.id)
-
-                ctx.fillStyle = s.color
-
-                switch (s.type) {
-                    case 'rect':
-                        ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * t.k, s.height * t.k);
-                        break;
-                    case 'circle':
-                        ctx.beginPath();
-                        ctx.ellipse(
-                            xToPx(s.left + s.width / 2), // Центр X
-                            yToPy(s.top + s.height / 2), // Центр Y
-                            s.width * t.k / 2,             // Радиус по X
-                            s.height * t.k / 2,            // Радиус по Y
-                            0,                           // Угол поворота
-                            0,                           // Начальный угол
-                            Math.PI * 2                  // Конечный угол (полный круг)
-                        );
-                        ctx.fill();
-                        break;
-                    case 'line':
-                        ctx.beginPath();
-                        ctx.moveTo( xToPx( s.left ) , yToPy( s.top ) );
-                        ctx.lineTo( xToPx( s.left + s.width ) , yToPy( s.top + s.height ) );
-                        ctx.closePath();
-                        ctx.strokeStyle = s.color;
-                        ctx.stroke();
-                        break;
-                    case 'point':
-                        ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
-                        break;
-                    default:
-                        console.log('(!) Wrong shape type')	
-                        ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
-                }
-
-
-                //ctx.strokeText()
-
-
-
-                    // === Рисуем ID фигуры по центру её видимой части ===
-
-
-                    // Видимая область фигуры
-                    const visibleLeft   = Math.max(s.left, t.visibleLeft);
-                    const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
-                    const visibleTop    = Math.max(s.top, t.visibleTop);
-                    const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
-
-                    const visibleWidth  = visibleRight - visibleLeft;
-                    const visibleHeight = visibleBottom - visibleTop;
-
-                    const px = xToPx(visibleLeft + visibleWidth / 2);
-                    const py = yToPy(visibleTop + visibleHeight / 2);
-
-                    const text = s.id;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
-
-                    // Настройки размеров шрифта
-                    const H_MIN = 6, H_MAX = 18;  // Горизонтально
-                    const V_MIN = 4, V_MAX = 14;  // Вертикально
-                    const STEP = 0.5;
-
-                    let found = false;
-
-                    // Сначала пробуем горизонтально
-                    for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
-                        ctx.font = `${fontSize}px sans-serif`;
-                        const textWidth = ctx.measureText(text).width;
-                        const textHeight = fontSize;
-
-                        if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k) {
-                            ctx.fillText(text, px, py);
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    // Если не влезло — пробуем вертикально
-                    if (!found) {
-                        for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
+                s.left + delta <= t.visibleRight &&
+                s.top + s.height - delta >= t.visibleTop &&
+                s.top + delta <= t.visibleBottom
+            );
+        });
+    
+        // Отрисовка фигур
+        visibleShapes.forEach(s => {
+            if (cbUpdateList.checked) addListItem(cTree, s.type + ' ' + s.id);
+            ctx.fillStyle = s.color;
+    
+            switch (s.type) {
+                case 'rect':
+                    ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * t.k, s.height * t.k);
+                    break;
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        xToPx(s.left + s.width / 2),
+                        yToPy(s.top + s.height / 2),
+                        s.width * t.k / 2,
+                        s.height * t.k / 2,
+                        0, 0, Math.PI * 2
+                    );
+                    ctx.fill();
+                    break;
+                case 'line':
+                    ctx.beginPath();
+                    ctx.moveTo(xToPx(s.left), yToPy(s.top));
+                    ctx.lineTo(xToPx(s.left + s.width), yToPy(s.top + s.height));
+                    ctx.closePath();
+                    ctx.strokeStyle = s.color;
+                    ctx.stroke();
+                    break;
+                case 'point':
+                    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+                    break;
+                default:
+                    console.log('(!) Wrong shape type');
+                    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+            }
+            
+            
+            
+                  // === Рисуем ID фигуры по центру её видимой части ===
+    
+    
+                        // Видимая область фигуры
+                        const visibleLeft   = Math.max(s.left, t.visibleLeft);
+                        const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
+                        const visibleTop    = Math.max(s.top, t.visibleTop);
+                        const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
+    
+                        const visibleWidth  = visibleRight - visibleLeft;
+                        const visibleHeight = visibleBottom - visibleTop;
+    
+                        const px = xToPx(visibleLeft + visibleWidth / 2);
+                        const py = yToPy(visibleTop + visibleHeight / 2);
+    
+                        const text = s.id;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
+    
+                        // Настройки размеров шрифта
+                        const H_MIN = 6, H_MAX = 18;  // Горизонтально
+                        const V_MIN = 4, V_MAX = 14;  // Вертикально
+                        const STEP = 0.5;
+    
+                        let found = false;
+    
+                        // Сначала пробуем горизонтально
+                        for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
                             ctx.font = `${fontSize}px sans-serif`;
                             const textWidth = ctx.measureText(text).width;
                             const textHeight = fontSize;
-
-                            // В повороте местами ширина и высота
-                            if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
-                                ctx.save();
-                                ctx.translate(px, py);
-                                ctx.rotate(-Math.PI / 2);
-                                ctx.fillText(text, 0, 0);
-                                ctx.restore();
+    
+                            if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k) {
+                                ctx.fillText(text, px, py);
                                 found = true;
                                 break;
                             }
                         }
-                    }
+    
+                        // Если не влезло — пробуем вертикально
+                        if (!found) {
+                            for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
+                                ctx.font = `${fontSize}px sans-serif`;
+                                const textWidth = ctx.measureText(text).width;
+                                const textHeight = fontSize;
+    
+                                // В повороте местами ширина и высота
+                                if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
+                                    ctx.save();
+                                    ctx.translate(px, py);
+                                    ctx.rotate(-Math.PI / 2);
+                                    ctx.fillText(text, 0, 0);
+                                    ctx.restore();
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+    
+            
+            
+            
+        });
+    
+        // Сбор всех вертикальных и горизонтальных границ фигур
+        const xEdges = new Map(); // {coord -> count}
+        const yEdges = new Map();
+    
+        for (const s of visibleShapes) {
+            const x1 = s.left;
+            const x2 = s.left + s.width;
+            const y1 = s.top;
+            const y2 = s.top + s.height;
+    
+            if (x1 >= t.visibleLeft && x1 <= t.visibleRight) xEdges.set(x1, (xEdges.get(x1) || 0) + 1);
+            if (x2 >= t.visibleLeft && x2 <= t.visibleRight) xEdges.set(x2, (xEdges.get(x2) || 0) + 1);
+            if (y1 >= t.visibleTop && y1 <= t.visibleBottom) yEdges.set(y1, (yEdges.get(y1) || 0) + 1);
+            if (y2 >= t.visibleTop && y2 <= t.visibleBottom) yEdges.set(y2, (yEdges.get(y2) || 0) + 1);
+        }
+    
+        // Выбор до 10 наиболее частых границ
+        const getTopEdges = (edgeMap, limit = 10) =>
+            [...edgeMap.entries()]
+                .sort((a, b) => b[1] - a[1]) // по убыванию частоты
+                .slice(0, limit)
+                .map(([coord]) => coord);
+    
+        const topX = getTopEdges(xEdges);
+        const topY = getTopEdges(yEdges);
+    
+        // Настройки стиля делений
+        ctx.strokeStyle = '#00aaff';
+        ctx.fillStyle = '#00aaff';
+        ctx.font = '12px sans-serif';
+        ctx.textBaseline = 'middle';
+    
+        // Отступы, чтобы не рисовать до краев
+        const margin = 20;
+    
+        // Рисуем вертикальные деления
+        for (const xVal of topX) {
+            const px = xToPx(xVal);
+            if (px < margin || px > cGraph.width - margin) continue;
+    
+            ctx.beginPath();
+            ctx.moveTo(px, margin);
+            ctx.lineTo(px, cGraph.height - margin);
+            ctx.stroke();
+    
+            // Подписи сверху и снизу
+            const label = xVal.toFixed(2);
+            ctx.fillText(label, px + 2, 10); // сверху
+            ctx.fillText(label, px + 2, cGraph.height - 10); // снизу
+        }
+    
+        // Рисуем горизонтальные деления
+        for (const yVal of topY) {
+            const py = yToPy(yVal);
+            if (py < margin || py > cGraph.height - margin) continue;
+    
+            ctx.beginPath();
+            ctx.moveTo(margin, py);
+            ctx.lineTo(cGraph.width - margin, py);
+            ctx.stroke();
+    
+            const label = yVal.toFixed(2);
+            ctx.fillText(label, 2, py - 1); // слева
+            ctx.fillText(label, cGraph.width - ctx.measureText(label).width - 2, py - 1); // справа
+        }
+    }
+    
+
+    // draw(cGraph){
+
+    //     cGraph.width  = cGraph.clientWidth;
+    //     cGraph.height = cGraph.clientHeight;
+
+
+    //     if(cbUpdateList.checked)cTree.innerHTML=''
+    //     const ctx = cGraph.getContext('2d');
+    //     ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
+        
+
+    //     this.shapes.forEach(s =>{
+    //         // Skip tiny shapes
+    //         if (s.width * t.k < 5 && s.height * t.k < 5) {
+    //             return; 
+    //         }
+    //         // Skip shapes out of viwport
+    //         const delta = 0						//for debug to see when shape disappeared
+    //         if (
+    //             s.left + s.width - delta >= t.visibleLeft &&
+    //             s.left 	         + delta <= t.visibleRight &&
+    //             s.top + s.height - delta>= t.visibleTop &&
+    //             s.top 			 + delta<= t.visibleBottom
+    //         ) {
+
+    //             // Drawing shape
+    //             if(cbUpdateList.checked)addListItem(cTree, s.type + ' ' + s.id)
+
+    //             ctx.fillStyle = s.color
+
+    //             switch (s.type) {
+    //                 case 'rect':
+    //                     ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * t.k, s.height * t.k);
+    //                     break;
+    //                 case 'circle':
+    //                     ctx.beginPath();
+    //                     ctx.ellipse(
+    //                         xToPx(s.left + s.width / 2), // Центр X
+    //                         yToPy(s.top + s.height / 2), // Центр Y
+    //                         s.width * t.k / 2,             // Радиус по X
+    //                         s.height * t.k / 2,            // Радиус по Y
+    //                         0,                           // Угол поворота
+    //                         0,                           // Начальный угол
+    //                         Math.PI * 2                  // Конечный угол (полный круг)
+    //                     );
+    //                     ctx.fill();
+    //                     break;
+    //                 case 'line':
+    //                     ctx.beginPath();
+    //                     ctx.moveTo( xToPx( s.left ) , yToPy( s.top ) );
+    //                     ctx.lineTo( xToPx( s.left + s.width ) , yToPy( s.top + s.height ) );
+    //                     ctx.closePath();
+    //                     ctx.strokeStyle = s.color;
+    //                     ctx.stroke();
+    //                     break;
+    //                 case 'point':
+    //                     ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+    //                     break;
+    //                 default:
+    //                     console.log('(!) Wrong shape type')	
+    //                     ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
+    //             }
+
+
+    //             //ctx.strokeText()
+
+    //                 // === Рисуем ID фигуры по центру её видимой части ===
+
+
+    //                 // Видимая область фигуры
+    //                 const visibleLeft   = Math.max(s.left, t.visibleLeft);
+    //                 const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
+    //                 const visibleTop    = Math.max(s.top, t.visibleTop);
+    //                 const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
+
+    //                 const visibleWidth  = visibleRight - visibleLeft;
+    //                 const visibleHeight = visibleBottom - visibleTop;
+
+    //                 const px = xToPx(visibleLeft + visibleWidth / 2);
+    //                 const py = yToPy(visibleTop + visibleHeight / 2);
+
+    //                 const text = s.id;
+    //                 ctx.textAlign = "center";
+    //                 ctx.textBaseline = "middle";
+    //                 ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
+
+    //                 // Настройки размеров шрифта
+    //                 const H_MIN = 6, H_MAX = 18;  // Горизонтально
+    //                 const V_MIN = 4, V_MAX = 14;  // Вертикально
+    //                 const STEP = 0.5;
+
+    //                 let found = false;
+
+    //                 // Сначала пробуем горизонтально
+    //                 for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
+    //                     ctx.font = `${fontSize}px sans-serif`;
+    //                     const textWidth = ctx.measureText(text).width;
+    //                     const textHeight = fontSize;
+
+    //                     if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k) {
+    //                         ctx.fillText(text, px, py);
+    //                         found = true;
+    //                         break;
+    //                     }
+    //                 }
+
+    //                 // Если не влезло — пробуем вертикально
+    //                 if (!found) {
+    //                     for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
+    //                         ctx.font = `${fontSize}px sans-serif`;
+    //                         const textWidth = ctx.measureText(text).width;
+    //                         const textHeight = fontSize;
+
+    //                         // В повороте местами ширина и высота
+    //                         if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
+    //                             ctx.save();
+    //                             ctx.translate(px, py);
+    //                             ctx.rotate(-Math.PI / 2);
+    //                             ctx.fillText(text, 0, 0);
+    //                             ctx.restore();
+    //                             found = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
 
 
 
 
                     
-            }
-        })
+    //         }
+    //     })
 
 
 
-    }
+    //s}
 
 
     defineBoundaries(){
