@@ -191,7 +191,7 @@ ________________|
 		let xToPx
 		let yToPy
 
-		const ctx = cGraph.getContext('2d');
+		
 
 		function generate(){
 			shapesNum = parseInt(inumberOfShapes.value);
@@ -201,7 +201,7 @@ ________________|
 			xToPx = t.xToPx.bind(t)			// Binding methods for convinience
 		    yToPy = t.yToPy.bind(t)
 
-			draw();
+			shapeSet.draw(cGraph);
 
 		}
 		generate()
@@ -229,152 +229,7 @@ ________________|
 
 
 
-		function draw(){
 
-			cGraph.width  = cGraph.clientWidth;
-			cGraph.height = cGraph.clientHeight;
-
-
-			if(cbUpdateList.checked)cTree.innerHTML=''
-			ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
-			
-
-			shapeSet.shapes.forEach(s =>{
-				// Skip tiny shapes
-				if (s.width * t.k < 5 && s.height * t.k < 5) {
-					return; 
-				}
-				// Skip shapes out of viwport
-				const delta = 0						//for debug to see when shape disappeared
-				if (
-					s.left + s.width - delta >= t.visibleLeft &&
-					s.left 	         + delta <= t.visibleRight &&
-					s.top + s.height - delta>= t.visibleTop &&
-					s.top 			 + delta<= t.visibleBottom
-				) {
-
-					// Drawing shape
-					if(cbUpdateList.checked)addListItem(cTree, s.type + ' ' + s.id)
-
-					ctx.fillStyle = s.color
-
-					switch (s.type) {
-						case 'rect':
-							ctx.fillRect(xToPx(s.left), yToPy(s.top), s.width * t.k, s.height * t.k);
-							break;
-						case 'circle':
-							ctx.beginPath();
-							ctx.ellipse(
-								xToPx(s.left + s.width / 2), // Центр X
-								yToPy(s.top + s.height / 2), // Центр Y
-								s.width * t.k / 2,             // Радиус по X
-								s.height * t.k / 2,            // Радиус по Y
-								0,                           // Угол поворота
-								0,                           // Начальный угол
-								Math.PI * 2                  // Конечный угол (полный круг)
-							);
-							ctx.fill();
-							break;
-						case 'line':
-							ctx.beginPath();
-							ctx.moveTo( xToPx( s.left ) , yToPy( s.top ) );
-							ctx.lineTo( xToPx( s.left + s.width ) , yToPy( s.top + s.height ) );
-							ctx.closePath();
-							ctx.strokeStyle = s.color;
-							ctx.stroke();
-							break;
-						case 'point':
-							ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
-							break;
-						default:
-							console.log('(!) Wrong shape type')	
-						    ctx.fillRect(xToPx(s.left), yToPy(s.top), 5, 5);
-					}
-
-
-					//ctx.strokeText()
-
-
-
-						// === Рисуем ID фигуры по центру её видимой части ===
-
-
-						// Видимая область фигуры
-						const visibleLeft   = Math.max(s.left, t.visibleLeft);
-						const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
-						const visibleTop    = Math.max(s.top, t.visibleTop);
-						const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
-
-						const visibleWidth  = visibleRight - visibleLeft;
-						const visibleHeight = visibleBottom - visibleTop;
-
-						const px = xToPx(visibleLeft + visibleWidth / 2);
-						const py = yToPy(visibleTop + visibleHeight / 2);
-
-						const text = s.id;
-						ctx.textAlign = "center";
-						ctx.textBaseline = "middle";
-						ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
-
-						// Настройки размеров шрифта
-						const H_MIN = 6, H_MAX = 18;  // Горизонтально
-						const V_MIN = 4, V_MAX = 14;  // Вертикально
-						const STEP = 0.5;
-
-						let found = false;
-
-						// Сначала пробуем горизонтально
-						for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
-							ctx.font = `${fontSize}px sans-serif`;
-							const textWidth = ctx.measureText(text).width;
-							const textHeight = fontSize;
-
-							if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k) {
-								ctx.fillText(text, px, py);
-								found = true;
-								break;
-							}
-						}
-
-						// Если не влезло — пробуем вертикально
-						if (!found) {
-							for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
-								ctx.font = `${fontSize}px sans-serif`;
-								const textWidth = ctx.measureText(text).width;
-								const textHeight = fontSize;
-
-								// В повороте местами ширина и высота
-								if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
-									ctx.save();
-									ctx.translate(px, py);
-									ctx.rotate(-Math.PI / 2);
-									ctx.fillText(text, 0, 0);
-									ctx.restore();
-									found = true;
-									break;
-								}
-							}
-						}
-
-
-
-
-						
-				}
-			})
-
-			// // Boundary rectangle
-			// ctx.beginPath();
-			// ctx.moveTo( xToPx( Xmin ) , yToPy( Ymin ) );
-			// ctx.lineTo( xToPx( Xmin ) , yToPy( Ymax ) );
-			// ctx.lineTo( xToPx( Xmax ) , yToPy( Ymax ) );
-			// ctx.lineTo( xToPx( Xmax ) , yToPy( Ymin ) );
-			// ctx.lineTo( xToPx( Xmin ) , yToPy( Ymin ) );
-			// ctx.closePath();
-			// ctx.strokeStyle = 'red';
-			// ctx.stroke();
-
-		}
 
 
 
@@ -386,7 +241,7 @@ ________________|
 		cGraph.addEventListener('mousemove', (e) => {
 			if(t.isDragging ){
 				t.mouseMove( e.clientX, e.clientY )
-				draw();
+				shapeSet.draw(cGraph);
 			}
 		});
 
@@ -401,7 +256,7 @@ ________________|
 		// Добавляем событие для вращения колесика мыши
 		cGraph.addEventListener('wheel', (e) => {
 			t.mouseWheel(e.deltaY)
-			draw();
+			shapeSet.draw(cGraph);
 			e.preventDefault();
 		});
 
@@ -414,23 +269,13 @@ ________________|
 				// cGraph.width = cGraph.clientWidth;
 				// cGraph.height = cGraph.clientHeight;
 				t.resize(cGraph.clientWidth, cGraph.clientHeight)
-				draw()
+				shapeSet.draw(cGraph)
                 //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
             }
         });
 
         // Начинаем наблюдение за элементом
         resizeObserver.observe(cGraph);
-
-		// window.addEventListener('resize', () => {
-		// 	const w = cGraph.clientWidth
-		// 	const h = cGraph.clientHeight
-
-		// 	t.resize(w,h)
-		// 	draw()
-		// });
-
-
 
 		
 
@@ -458,16 +303,16 @@ ________________|
 			});
 		document.getElementById('b-Reset').addEventListener('click', function() {
 				t.initScale();
-				draw();
+				shapeSet.draw(cGraph);
 			});
 		document.getElementById('b-Center').addEventListener('click', function() {
 				t.centrlize()
-				draw();
+				shapeSet.draw(cGraph);
 
 			});
 		document.getElementById('b-ReCreate').addEventListener('click', function() {
 			    // t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
-				draw();
+				shapeSet.draw(cGraph);
 				//alert('Hello');
 			});
 	</script>
