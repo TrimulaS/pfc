@@ -126,12 +126,15 @@ ________________|
 	<script src = './js/split2.js'>	</script>
 	<script src = './js/transform2D.js'>	</script>
 	<script src = './js/color.js'>	</script>
+<!-- JSON file with data adopted to js to include locally -->
+	<script src = './data/data.js'>	</script>
 
 	<div id = 'pra'  class="flex-column">
 		<div class="flex-row">
 			<label>
                 <input type="checkbox" id="cb-UpdateList" checked="checked">Update List
 				<input type="checkbox" id="cb-text-direction" checked="checked">Adopt text direction
+				<input type="checkbox" id="cb-grid" checked="checked">Grid
             </label>
 
 		</div>
@@ -170,6 +173,7 @@ ________________|
 		const cMain = document.getElementById('c-main');
 		const cbUpdateList = document.getElementById('cb-UpdateList');
 		const cbTextDirection = document.getElementById('cb-text-direction');
+		const cbGrid= document.getElementById('cb-grid');
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
@@ -194,8 +198,30 @@ ________________|
 		
 
 		function generate(){
+			
+			shapeSet = new ShapeSet()
+
+			// Random fillup
 			shapesNum = parseInt(inumberOfShapes.value);
-			shapeSet = new ShapeSet(shapesNum , 60, 1000 , 30, 500)
+			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+
+			// Fetch from JSON file (blocked by browser)
+			// fetch('data/data.json')
+			// .then(response => response.json())
+			// .then(jsonData => {
+			// 	const eonArray = data.eon;
+			// 	shapeSet.getFromJsonArray(jsonData.eon)
+			// 	const eraArray = data.era;
+			// 	const periodArray = data.period;
+			// 	const ageArray = data.age;
+			// });
+			shapeSet.getFromJsonArray(jsonData.eon)
+			shapeSet.getFromJsonArray(jsonData.era)
+			shapeSet.getFromJsonArray(jsonData.period)
+			shapeSet.getFromJsonArray(jsonData.age)
+
+
+
 			log('Shpes in set: ' + shapeSet.shapes.length)
 			t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
 			xToPx = t.xToPx.bind(t)			// Binding methods for convinience
@@ -299,22 +325,26 @@ ________________|
 
 		// Manage
 		document.getElementById('b-Generate').addEventListener('click', function() {
-				generate();
-			});
+			generate();
+		});
 		document.getElementById('b-Reset').addEventListener('click', function() {
-				t.initScale();
-				shapeSet.draw(cGraph);
-			});
+			t.initScale();
+			shapeSet.draw(cGraph);
+		});
 		document.getElementById('b-Center').addEventListener('click', function() {
-				t.centrlize()
-				shapeSet.draw(cGraph);
+			t.centrlize()
+			shapeSet.draw(cGraph);
 
-			});
+		});
 		document.getElementById('b-ReCreate').addEventListener('click', function() {
-			    // t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
-				shapeSet.draw(cGraph);
-				//alert('Hello');
-			});
+			// t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
+			shapeSet.draw(cGraph);
+			//alert('Hello');
+		});
+		cbGrid.addEventListener('change', function() {
+			shapeSet.settings(this.checked);
+		});
+		shapeSet.settings(cbGrid.checked);
 	</script>
 
 	
@@ -328,5 +358,7 @@ ________________|
 make relative coordinates not depandant from scale
 
 1. Adding shapes depicting tie periods
+
+divisions corrctions: do not show near and overlapped divisions, titles out of borders
 
 -->
