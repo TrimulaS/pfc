@@ -134,7 +134,7 @@ ________________|
 			<label>
                 <input type="checkbox" id="cb-UpdateList" checked="checked">Update List
 				<input type="checkbox" id="cb-text-direction" checked="checked">Adopt text direction
-				<input type="checkbox" id="cb-grid" checked="checked">Grid
+				<input type="checkbox" id="cb-draw-grid" checked="checked">Grid
             </label>
 
 		</div>
@@ -173,7 +173,7 @@ ________________|
 		const cMain = document.getElementById('c-main');
 		const cbUpdateList = document.getElementById('cb-UpdateList');
 		const cbTextDirection = document.getElementById('cb-text-direction');
-		const cbGrid= document.getElementById('cb-grid');
+		const cbDrawGrid= document.getElementById('cb-draw-grid');
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
@@ -205,6 +205,12 @@ ________________|
 			shapesNum = parseInt(inumberOfShapes.value);
 			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
 
+			//Fill from JSON
+			shapeSet.getFromJsonArray(jsonData.eon)
+			shapeSet.getFromJsonArray(jsonData.era)
+			shapeSet.getFromJsonArray(jsonData.period)
+			shapeSet.getFromJsonArray(jsonData.age)
+
 			// Fetch from JSON file (blocked by browser)
 			// fetch('data/data.json')
 			// .then(response => response.json())
@@ -215,10 +221,8 @@ ________________|
 			// 	const periodArray = data.period;
 			// 	const ageArray = data.age;
 			// });
-			shapeSet.getFromJsonArray(jsonData.eon)
-			shapeSet.getFromJsonArray(jsonData.era)
-			shapeSet.getFromJsonArray(jsonData.period)
-			shapeSet.getFromJsonArray(jsonData.age)
+
+
 
 
 
@@ -246,18 +250,6 @@ ________________|
 
 
 
-		
-		
-
-		
-	
-
-
-
-
-
-
-
 
 		// Add listeners
 		cGraph.addEventListener('mousedown', (e) => {
@@ -279,7 +271,6 @@ ________________|
 			t.isDragging = false;
 		});
 
-		// Добавляем событие для вращения колесика мыши
 		cGraph.addEventListener('wheel', (e) => {
 			t.mouseWheel(e.deltaY)
 			shapeSet.draw(cGraph);
@@ -289,11 +280,6 @@ ________________|
 		// Resize canvas
 		const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-                // // Получаем новые размеры элемента
-                // const { width, height } = entry.contentRect;
-				// 	// ОБЯЗАТЕЛЬНО! Иначе canvas "сплющится" или "растянется"
-				// cGraph.width = cGraph.clientWidth;
-				// cGraph.height = cGraph.clientHeight;
 				t.resize(cGraph.clientWidth, cGraph.clientHeight)
 				shapeSet.draw(cGraph)
                 //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
@@ -341,10 +327,15 @@ ________________|
 			shapeSet.draw(cGraph);
 			//alert('Hello');
 		});
-		cbGrid.addEventListener('change', function() {
+		cbDrawGrid.addEventListener('change', function() {
 			shapeSet.settings(this.checked);
 		});
-		shapeSet.settings(cbGrid.checked);
+		cbTextDirection.addEventListener('change', function() {
+			shapeSet.settings(undefined, this.checked);
+		});
+
+
+		shapeSet.settings(cbDrawGrid.checked, cbTextDirection.checked);
 	</script>
 
 	
@@ -360,5 +351,8 @@ make relative coordinates not depandant from scale
 1. Adding shapes depicting tie periods
 
 divisions corrctions: do not show near and overlapped divisions, titles out of borders
+- dynamic scaling
+-grid if all visibel shapes have border on it choos drk color. Grid test ovelapped with text and lines
+
 
 -->

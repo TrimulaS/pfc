@@ -1,18 +1,3 @@
-// Classes to fillup shapes randomly
-
-//undefined
-
-/*
-
-Shape
-	Sizes
-		Top
-		Left
-		Width
-		Height
-		Color
-
-*/
 
 class Shape{
     static num = 0
@@ -24,7 +9,7 @@ class Shape{
         this.height =  height
         this.color = (color === undefined) ? ShapeRandom.getColor() : color;
         Shape.num++
-        this.id = id === '' ? Shape.num : Shape.num + '_' + id; // Используем Shape.num
+        this.id = id === '' ? Shape.num : id      //:Shape.num + '_' + id; // Используем Shape.num
         this.notes = notes
         
     }
@@ -44,26 +29,15 @@ class Shape{
 }
 
 
-//new Shape('rect', undefined,  left,   top,    width,   height, id                  , notes)
-
-
-// new Shape('rect', undefined, 1000,   541000,    800,   541000,          'Фанерозой',     'Eon' )      //	от 541 млн лет назад до
-// new Shape('rect', undefined, 1000,  2500000,    800,  1959000,         'Протерозой',     'Eon' )      //	от 2.5 млрд до 541 млн лет назад
-// new Shape('rect', undefined, 1000,  4000000,    800,  1500000,              'Архей',     'Eon' )      //	от 4 до 2.5 млрд лет назад
-// new Shape('rect', undefined, 1000,  4600000,    800,   600000,   'Катархей (Гадей)',     'Eon' )      //  от 4.6 до 4 млрд лет назад
 
 
 
 
-
-
-
-
-
+// Random generated shape in boundaries
 class ShapeRandom extends Shape {
     constructor(Xmin_i, Xmax_i, Ymin_i, Ymax_i) {
 
-        const shapeMaxW = ( Xmax_i - Xmin_i ) / 10          // Shape width is about 100 of alowed are width
+        const shapeMaxW = ( Xmax_i - Xmin_i ) / 10          // Shape width is  /10 of alowed are width
         const shapeMaxH = ( Ymax_i - Ymin_i ) / 10
 
         const left = Xmin_i + Math.random() * (Xmax_i - Xmin_i);
@@ -93,6 +67,15 @@ class ShapeRandom extends Shape {
 
 
 class ShapeSet{
+    minlSizeToDraw = 3
+    offsetBeforeBorderToDraw = 0
+    maxGridNumber = 20
+    
+    // Settings:
+    drawGrid = true
+    adoptTextDirection = true
+    
+
     shapes = []
     // Initial sizes to generate shapes
     Xmin_i = 0
@@ -107,18 +90,10 @@ class ShapeSet{
 
     // Filling up shapes
     constructor(){
-
-       
-
-        //this.fillRandomly(shapesNum)
-        //this.fillWithSquares(shapesNum)
-        //this.fillExact()
-
-
-
-
 			
     }
+
+
     fillRandomly(shapesNum, Xmin_i, Xmax_i, Ymin_i, Ymax_i){
         this.shapesNum = shapesNum
 		this.Xmin_i = Xmin_i
@@ -170,16 +145,16 @@ class ShapeSet{
         if (cbUpdateList.checked) cTree.innerHTML = '';
     
         const ctx = cGraph.getContext('2d');
-        ctx.clearRect(0, 0, cGraph.width, cGraph.height); // Очистка canvas
+        ctx.clearRect(0, 0, cGraph.width, cGraph.height); 
     
         const visibleShapes = this.shapes.filter(s => {
-            if (s.width * t.k < 5 && s.height * t.k < 5) return false;
-            const delta = 0;
+            if (s.width * t.k < this.minlSizeToDraw   &&   s.height * t.k < this.minlSizeToDraw) return false;
+            
             return (
-                s.left + s.width - delta >= t.visibleLeft &&
-                s.left + delta <= t.visibleRight &&
-                s.top + s.height - delta >= t.visibleTop &&
-                s.top + delta <= t.visibleBottom
+                s.left + s.width - this.offsetBeforeBorderToDraw    >= t.visibleLeft &&
+                s.left           + this.offsetBeforeBorderToDraw    <= t.visibleRight &&
+                s.top + s.height - this.offsetBeforeBorderToDraw    >= t.visibleTop &&
+                s.top            + this.offsetBeforeBorderToDraw    <= t.visibleBottom
             );
         });
     
@@ -221,65 +196,65 @@ class ShapeSet{
             
             
             
-                  // === Рисуем ID фигуры по центру её видимой части ===
-    
-    
-                        // Видимая область фигуры
-                        const visibleLeft   = Math.max(s.left, t.visibleLeft);
-                        const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
-                        const visibleTop    = Math.max(s.top, t.visibleTop);
-                        const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
-    
-                        const visibleWidth  = visibleRight - visibleLeft;
-                        const visibleHeight = visibleBottom - visibleTop;
-    
-                        const px = xToPx(visibleLeft + visibleWidth / 2);
-                        const py = yToPy(visibleTop + visibleHeight / 2);
-    
-                        const text = s.id;
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-                        ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
-    
-                        // Настройки размеров шрифта
-                        const H_MIN = 6, H_MAX = 18;  // Горизонтально
-                        const V_MIN = 4, V_MAX = 14;  // Вертикально
-                        const STEP = 0.5;
-    
-                        let found = false;
-    
-                        // Сначала пробуем горизонтально
-                        for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
-                            ctx.font = `${fontSize}px sans-serif`;
-                            const textWidth = ctx.measureText(text).width;
-                            const textHeight = fontSize;
-    
-                            if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k) {
-                                ctx.fillText(text, px, py);
-                                found = true;
-                                break;
-                            }
-                        }
-    
-                        // Если не влезло — пробуем вертикально
-                        if (!found) {
-                            for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
-                                ctx.font = `${fontSize}px sans-serif`;
-                                const textWidth = ctx.measureText(text).width;
-                                const textHeight = fontSize;
-    
-                                // В повороте местами ширина и высота
-                                if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
-                                    ctx.save();
-                                    ctx.translate(px, py);
-                                    ctx.rotate(-Math.PI / 2);
-                                    ctx.fillText(text, 0, 0);
-                                    ctx.restore();
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
+            // === Text фигуры по центру её видимой части ===
+
+
+            // Видимая область фигуры
+            const visibleLeft   = Math.max(s.left, t.visibleLeft);
+            const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
+            const visibleTop    = Math.max(s.top, t.visibleTop);
+            const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
+
+            const visibleWidth  = visibleRight - visibleLeft;
+            const visibleHeight = visibleBottom - visibleTop;
+
+            const px = xToPx(visibleLeft + visibleWidth / 2);
+            const py = yToPy(visibleTop + visibleHeight / 2);
+
+            const text = s.id;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle =  getColorfulContrastingTextColor(s.color); //invertColor(s.color || "#FFFFFF");
+
+            // Настройки размеров шрифта
+            const H_MIN = 6, H_MAX = 18;  // Горизонтально
+            const V_MIN = 4, V_MAX = 14;  // Вертикально
+            const STEP = 0.5;
+
+            let found = false;
+
+            // Сначала пробуем горизонтально
+            for (let fontSize = H_MAX; fontSize >= H_MIN; fontSize -= STEP) {
+                ctx.font = `${fontSize}px sans-serif`;
+                const textWidth = ctx.measureText(text).width;
+                const textHeight = fontSize;
+
+                if (textWidth <= visibleWidth * t.k && textHeight <= visibleHeight * t.k   || !this.adoptTextDirection) {
+                    ctx.fillText(text, px, py);
+                    found = true;
+                    break;
+                }
+            }
+
+            // Если не влезло — пробуем вертикально
+            if (!found) {
+                for (let fontSize = V_MAX; fontSize >= V_MIN; fontSize -= STEP) {
+                    ctx.font = `${fontSize}px sans-serif`;
+                    const textWidth = ctx.measureText(text).width;
+                    const textHeight = fontSize;
+
+                    // В повороте местами ширина и высота
+                    if (textHeight <= visibleWidth * t.k && textWidth <= visibleHeight * t.k) {
+                        ctx.save();
+                        ctx.translate(px, py);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(text, 0, 0);
+                        ctx.restore();
+                        found = true;
+                        break;
+                    }
+                }
+            }
     
             
             
@@ -308,7 +283,7 @@ class ShapeSet{
             }
         
             // Выбор до 10 наиболее частых границ
-            const getTopEdges = (edgeMap, limit = 10) =>
+            const getTopEdges = (edgeMap, limit = this.maxGridNumber) =>
                 [...edgeMap.entries()]
                     .sort((a, b) => b[1] - a[1]) // по убыванию частоты
                     .slice(0, limit)
@@ -382,8 +357,9 @@ class ShapeSet{
 
     }
 
-    settings(drawGrid=true){
-        this.drawGrid = drawGrid
+    settings(drawGrid, adoptTextDirection){
+        if(drawGrid!==undefined)this.drawGrid = drawGrid
+        if(adoptTextDirection!==undefined)this.adoptTextDirection = adoptTextDirection
     }
 
 
