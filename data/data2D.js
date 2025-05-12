@@ -1,5 +1,5 @@
-{"eon":[
-    { "id": "Фанерозой",                 "Start": 541000,    "End": 0,         "Type": "Eon",  "Shift": 1,  "English": "Phanerozoic"       },
+const jsonData2D = {"eon":[
+    { "id": "Фанерозой",                "Start": 541000,    "End": 0,         "Type": "Eon",  "Shift": 1,  "English": "Phanerozoic"       },
     { "id": "Протерозой",               "Start": 2500000,   "End": 541000,    "Type": "Eon",  "Shift": 1,  "English": "Proterozoic"       },
     { "id": "Архей",                    "Start": 4000000,   "End": 2500000,   "Type": "Eon",  "Shift": 1,  "English": "Archean"           },
     { "id": "Катархей (Гадей)",         "Start": 4600000,   "End": 4000000,   "Type": "Eon",  "Shift": 1,  "English": "Hadean"            }
@@ -38,7 +38,9 @@
     { "id": "Статерий",                 "Start": 1800000,   "End": 1600000,   "Type": "Period", "Shift": 3, "English": "Statherian"      },
     { "id": "Орозирий",                 "Start": 2050000,   "End": 1800000,   "Type": "Period", "Shift": 3, "English": "Orosirian"       },
     { "id": "Риасий",                   "Start": 2300000,   "End": 2050000,   "Type": "Period", "Shift": 3, "English": "Rhyacian"        },
-    { "id": "Сидерий",                  "Start": 2500000,   "End": 2300000,   "Type": "Period", "Shift": 3, "English": "Siderian"        },
+    { "id": "Сидерий",                  "Start": 2500000,   "End": 2300000,   "Type": "Period", "Shift": 3, "English": "Siderian"        }
+],
+"epoch":[    
     { "id": "Голоцен",                  "Start": 11.7,      "End": 0,         "Type": "Epoch", "Shift": 4,  "English": "Holocene"         },
     { "id": "Плейстоцен",               "Start": 2580,      "End": 11.7,      "Type": "Epoch", "Shift": 4,  "English": "Pleistocene"      },
     { "id": "Плиоцен",                  "Start": 5333,      "End": 2580,      "Type": "Epoch", "Shift": 4,  "English": "Pliocene"         },
@@ -79,7 +81,7 @@
     { "id": "Мегхалайский",             "Start": 4.2,       "End": 0,         "Type": "Age",   "Shift": 5,  "English": "Meghalayan"       },
     { "id": "Северогриппианский",       "Start": 8.2,       "End": 4.2,       "Type": "Age",   "Shift": 5,  "English": "Northgrippian"    },
     { "id": "Гренландский",             "Start": 11.7,      "End": 8.2,       "Type": "Age",   "Shift": 5,  "English": "Greenlandian"     },
-    { "id": "Поздний (Tarantian/Chibanian)", "Start": 126, "End": 11.7,      "Type": "Age",   "Shift": 5,  "English": "Tarantian"        },
+    { "id": "Тарантийский",             "Start": 126,       "End": 11.7,      "Type": "Age",   "Shift": 5,  "English": "Tarantian"        },
     { "id": "Средний Ionian",           "Start": 781,       "End": 126,       "Type": "Age",   "Shift": 5,  "English": "Ionian"           },
     { "id": "Калабрийский",             "Start": 1800,      "End": 781,       "Type": "Age",   "Shift": 5,  "English": "Calabrian"        },
     { "id": "Гелазский",                "Start": 2580,      "End": 1800,      "Type": "Age",   "Shift": 5,  "English": "Gelasian"         },
@@ -180,4 +182,4 @@
     { "id": "Форчунский",               "Start": 542000,    "End": 529000,    "Type": "Age",   "Shift": 5,  "English": "Fortunian"        }
   ]
 
-}   
+}   ;

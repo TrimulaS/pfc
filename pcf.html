@@ -126,8 +126,9 @@ ________________|
 	<script src = './js/split2.js'>	</script>
 	<script src = './js/transform2D.js'>	</script>
 	<script src = './js/color.js'>	</script>
+	<!-- <script src = './js/aux.js'>	</script> -->
 <!-- JSON file with data adopted to js to include locally -->
-	<script src = './data/data.js'>	</script>
+	<script src = './data/data2D.js'>	</script>
 
 	<div id = 'pra'  class="flex-column">
 		<div class="flex-row">
@@ -191,25 +192,31 @@ ________________|
 		// 1. Generate shape set
 		let shapesNum
 		let shapeSet
-		let t 
-		let xToPx
-		let yToPy
+		let t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
 
 		
 
 		function generate(){
 			
-			shapeSet = new ShapeSet()
+			shapeSet = new ShapeSet(t)
 
 			// Random fillup
 			shapesNum = parseInt(inumberOfShapes.value);
 			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
 
 			//Fill from JSON
-			shapeSet.getFromJsonArray(jsonData.eon)
-			shapeSet.getFromJsonArray(jsonData.era)
-			shapeSet.getFromJsonArray(jsonData.period)
-			shapeSet.getFromJsonArray(jsonData.age)
+
+			shapeSet.getFrom1DJsonArray(jsonData2D.eon)
+			shapeSet.getFrom1DJsonArray(jsonData2D.era)
+			shapeSet.getFrom1DJsonArray(jsonData2D.epoch)
+			shapeSet.getFrom1DJsonArray(jsonData2D.period)
+			shapeSet.getFrom1DJsonArray(jsonData2D.age)
+
+			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
+			// shapeSet.getFrom2DJsonArray(jsonData2D.era)
+			// shapeSet.getFrom2DJsonArray(jsonData2D.epoch)
+			// shapeSet.getFrom2DJsonArray(jsonData2D.period)
+			// shapeSet.getFrom2DJsonArray(jsonData2D.age)
 
 			// Fetch from JSON file (blocked by browser)
 			// fetch('data/data.json')
@@ -227,11 +234,10 @@ ________________|
 
 
 			log('Shpes in set: ' + shapeSet.shapes.length)
-			t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
-			xToPx = t.xToPx.bind(t)			// Binding methods for convinience
-		    yToPy = t.yToPy.bind(t)
+			
 
-			shapeSet.draw(cGraph);
+
+			shapeSet.draw();
 
 		}
 		generate()
@@ -259,7 +265,7 @@ ________________|
 		cGraph.addEventListener('mousemove', (e) => {
 			if(t.isDragging ){
 				t.mouseMove( e.clientX, e.clientY )
-				shapeSet.draw(cGraph);
+				shapeSet.draw();
 			}
 		});
 
@@ -273,7 +279,7 @@ ________________|
 
 		cGraph.addEventListener('wheel', (e) => {
 			t.mouseWheel(e.deltaY)
-			shapeSet.draw(cGraph);
+			shapeSet.draw();
 			e.preventDefault();
 		});
 
@@ -281,7 +287,7 @@ ________________|
 		const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
 				t.resize(cGraph.clientWidth, cGraph.clientHeight)
-				shapeSet.draw(cGraph)
+				shapeSet.draw()
                 //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
             }
         });
@@ -315,16 +321,16 @@ ________________|
 		});
 		document.getElementById('b-Reset').addEventListener('click', function() {
 			t.initScale();
-			shapeSet.draw(cGraph);
+			shapeSet.draw();
 		});
 		document.getElementById('b-Center').addEventListener('click', function() {
 			t.centrlize()
-			shapeSet.draw(cGraph);
+			shapeSet.draw();
 
 		});
 		document.getElementById('b-ReCreate').addEventListener('click', function() {
 			// t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
-			shapeSet.draw(cGraph);
+			shapeSet.draw();
 			//alert('Hello');
 		});
 		cbDrawGrid.addEventListener('change', function() {
@@ -352,7 +358,9 @@ make relative coordinates not depandant from scale
 
 divisions corrctions: do not show near and overlapped divisions, titles out of borders
 - dynamic scaling
--grid if all visibel shapes have border on it choos drk color. Grid test ovelapped with text and lines
+-grid if all visibel shapes have border on it choos drk color. Grid test ovelapped with text and lines process values 1MA
 
-
+Input:
+	- 1D data: (x, layer) second coordinate calculated 
+	- 2D data  (x,y)
 -->
