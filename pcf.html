@@ -64,7 +64,7 @@ ________________|
 		padding: 0;
 	}
 
-	#c-graph {
+	#canvas {
 		/* flex: 1;
 		border: 1px solid blue;  */
 		width: 100%; /* Занимает 100% ширины родителя */
@@ -122,6 +122,7 @@ ________________|
 
 
 <body>
+	<script src = './js/aux.js'>	</script>
 	<script src = './js/shapes.js'>	</script>
 	<script src = './js/split2.js'>	</script>
 	<script src = './js/transform2D.js'>	</script>
@@ -161,7 +162,7 @@ ________________|
 
 
 			<div> <!-- Extra div because splitter will add its own class -->
-				<canvas id="c-graph" class="container"></canvas>
+				<canvas id="canvas" class="container"></canvas>
 			</div>
 		</div>
 	</div>
@@ -178,7 +179,7 @@ ________________|
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
-		const cGraph = document.getElementById('c-graph');
+		const canvas = document.getElementById('canvas');
 		const inumberOfShapes = document.getElementById('numberOfShapes');
 
 
@@ -192,25 +193,28 @@ ________________|
 		// 1. Generate shape set
 		let shapesNum
 		let shapeSet
-		let t = new Transform2D(cGraph, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
+	
 
 		
 
 		function generate(){
 			
-			shapeSet = new ShapeSet(t)
+			shapeSet = new ShapeSet()
 
 			// Random fillup
 			shapesNum = parseInt(inumberOfShapes.value);
 			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+			
 
 			//Fill from JSON
 
-			shapeSet.getFrom1DJsonArray(jsonData2D.eon)
-			shapeSet.getFrom1DJsonArray(jsonData2D.era)
-			shapeSet.getFrom1DJsonArray(jsonData2D.epoch)
-			shapeSet.getFrom1DJsonArray(jsonData2D.period)
-			shapeSet.getFrom1DJsonArray(jsonData2D.age)
+			// shapeSet.getFrom1DJsonArray(jsonData2D.eon)
+			// shapeSet.getFrom1DJsonArray(jsonData2D.era)
+			// shapeSet.getFrom1DJsonArray(jsonData2D.epoch)
+			// shapeSet.getFrom1DJsonArray(jsonData2D.period)
+			// shapeSet.getFrom1DJsonArray(jsonData2D.age)
+
+			shapeSet.fillWithSquares(shapesNum)
 
 			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.era)
@@ -237,11 +241,22 @@ ________________|
 			
 
 
-			shapeSet.draw();
+
 
 		}
 		generate()
-		log(`Boundaries ${shapeSet.Xmin} x ${shapeSet.Ymin} .. ${shapeSet.Xmax} x ${shapeSet.Ymax}`)
+		// 2. Set transform MediaSourceHandle
+		let t = new Transform2D(canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
+		shapeSet.setTransformModel(t)
+
+		// const ctx = canvas.getContext('2d');
+        // ctx.fillStyle = 'blue'
+        // ctx.fillRect(10, 10, 50, 50);
+
+
+		log(shapeSet.toString())
+
+
 
 	
 		
@@ -258,26 +273,26 @@ ________________|
 
 
 		// Add listeners
-		cGraph.addEventListener('mousedown', (e) => {
+		canvas.addEventListener('mousedown', (e) => {
 			t.mouseDown(e.clientX ,  e.clientY)
 		});
 
-		cGraph.addEventListener('mousemove', (e) => {
+		canvas.addEventListener('mousemove', (e) => {
 			if(t.isDragging ){
 				t.mouseMove( e.clientX, e.clientY )
 				shapeSet.draw();
 			}
 		});
 
-		cGraph.addEventListener('mouseup', () => {
+		canvas.addEventListener('mouseup', () => {
 			t.isDragging = false;
 		});
 
-		cGraph.addEventListener('mouseleave', () => {
+		canvas.addEventListener('mouseleave', () => {
 			t.isDragging = false;
 		});
 
-		cGraph.addEventListener('wheel', (e) => {
+		canvas.addEventListener('wheel', (e) => {
 			t.mouseWheel(e.deltaY)
 			shapeSet.draw();
 			e.preventDefault();
@@ -286,14 +301,15 @@ ________________|
 		// Resize canvas
 		const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-				t.resize(cGraph.clientWidth, cGraph.clientHeight)
+				t.resize(canvas.clientWidth, canvas.clientHeight)
+				shapeSet.recalculateDynamicShapes();
 				shapeSet.draw()
                 //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
             }
         });
 
         // Начинаем наблюдение за элементом
-        resizeObserver.observe(cGraph);
+        resizeObserver.observe(canvas);
 
 		
 
@@ -329,7 +345,7 @@ ________________|
 
 		});
 		document.getElementById('b-ReCreate').addEventListener('click', function() {
-			// t = new Transform2D(cGraph, Xmin, Xmax, Ymin, Ymax);
+			// t = new Transform2D(canvas, Xmin, Xmax, Ymin, Ymax);
 			shapeSet.draw();
 			//alert('Hello');
 		});
@@ -353,6 +369,7 @@ ________________|
 ✓ Filtering shapes outside the viewport undesirable offset
 ✓ No mechanism fo do not process overlapped shapes -  not needed forthe moment (webGL)
 make relative coordinates not depandant from scale
+- spllitter returns after moving - listener conflicts
 
 1. Adding shapes depicting tie periods
 

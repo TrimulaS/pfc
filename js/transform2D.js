@@ -8,6 +8,11 @@ class Transform2D {
 	constructor(canvasElement, Xmin, Xmax, Ymin, Ymax) {
 		this.canvas = canvasElement;
 
+		// const ctx = canvasElement.getContext('2d');
+        // ctx.fillStyle = 'blue'
+        // ctx.fillRect(10, 10, 50, 50);
+
+
 		this.Wv = canvasElement.clientWidth;
 		this.Hv = canvasElement.clientHeight;
 
@@ -68,13 +73,20 @@ class Transform2D {
 
 	}
 
-
+	// From source to viewport
 	xToPx(x) {
 		return this.pxShift + this.k * x;
 	}
 
 	yToPy(y) {
 		return this.pyShift + this.k * y;
+	}
+	//From Viewport to source
+	PxToX(px){
+		return (px-this.pxShift) / this.k 
+	}
+	PyToY(py){
+		return (py-this.pyShift) / this.k 
 	}
 
 	calcVisibleRanges() {
