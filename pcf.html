@@ -128,8 +128,11 @@ ________________|
 	<script src = './js/transform2D.js'>	</script>
 	<script src = './js/color.js'>	</script>
 	<!-- <script src = './js/aux.js'>	</script> -->
+
 <!-- JSON file with data adopted to js to include locally -->
-	<script src = './data/data2D.js'>	</script>
+ 	<script src = './data/data1D.js'>	</script>
+	<!-- <script src = './data/data2D.js'>	</script> -->
+	<!-- <script src = './data/data_s.js'>	</script> -->
 
 	<div id = 'pra'  class="flex-column">
 		<div class="flex-row">
@@ -193,7 +196,6 @@ ________________|
 		// 1. Generate shape set
 		let shapesNum
 		let shapeSet
-	
 
 		
 
@@ -208,11 +210,11 @@ ________________|
 
 			//Fill from JSON
 
-			// shapeSet.getFrom1DJsonArray(jsonData2D.eon)
-			// shapeSet.getFrom1DJsonArray(jsonData2D.era)
-			// shapeSet.getFrom1DJsonArray(jsonData2D.epoch)
-			// shapeSet.getFrom1DJsonArray(jsonData2D.period)
-			// shapeSet.getFrom1DJsonArray(jsonData2D.age)
+			shapeSet.getFrom1DJsonArray(jsonData.eon)
+			shapeSet.getFrom1DJsonArray(jsonData.era)
+			shapeSet.getFrom1DJsonArray(jsonData.epoch)
+			shapeSet.getFrom1DJsonArray(jsonData.period)
+			shapeSet.getFrom1DJsonArray(jsonData.age)
 
 
 
@@ -220,12 +222,11 @@ ________________|
 		shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
 		shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
 			
-			shapeSet.getFrom1DJsonArray([
-   		{ "id": "first",  "Start": -100,   "End": 500,    "Shift": 0,   "Type": "Period", "English": "Siderian"        },
-   		{ "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
-		{ "id": "third", "Start": 100,      "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
-
-			])
+		// 	shapeSet.getFrom1DJsonArray([
+   		// { "id": "first",  "Start": -100,   "End": 500,    	 "Shift": 0,   "Type": "Period", "English": "Siderian"        },
+   		// { "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
+		// { "id": "third", "Start": 100,     "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
+		// 	])
 
 			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.era)

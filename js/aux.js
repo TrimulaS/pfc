@@ -1,32 +1,3 @@
-// function formatNumber(value) {
-//     // Можно переключить этот режим через флаг 10e or SI mode
-//     const useSI = true;
-
-//     if (useSI) {
-//         const SI = [
-//             { value: 1e15, symbol: "P" },
-//             { value: 1e12, symbol: "T" },
-//             { value: 1e9, symbol: "G" },
-//             { value: 1e6, symbol: "M" },
-//             { value: 1e3, symbol: "k" },
-//             { value: 1, symbol: "" },
-//             { value: 1e-3, symbol: "m" },
-//             { value: 1e-6, symbol: "µ" },
-//             { value: 1e-9, symbol: "n" },
-//             { value: 1e-12, symbol: "π" },
-//             { value: 1e-15, symbol: "f" }
-//         ];
-//         for (let i = 0; i < SI.length; i++) {
-//             if (Math.abs(value) >= SI[i].value) {
-//                 return (value / SI[i].value).toFixed(2) + SI[i].symbol;
-//             }
-//         }
-//         return value.toExponential(2);
-//     } else {
-//         return value.toExponential(2);
-//     }
-// }
-
 const formatNumber = (() => {
     const useSI = true;
     const SI = [

@@ -146,15 +146,18 @@ class ShapeSet{
             let dynamicCoordinate = 'x'
             //shape constructor(          type,      color,   left = 0,    top = 0 ,   width = 10,     height = 10,     d='', notes = '')
 
+            // const delta = End - Start       // common 
+            const delta = Math.abs(Start - End )      // chronoligical ages        
+
             if(    dynamicCoordinate === 'x'){
-                const shape = new Shape('rect',  undefined,  undefined,         End,     undefined,     End - Start,     id,    Type);
+                const shape = new Shape('rect',  undefined,  undefined,         End,     undefined,     delta,     id,    Type);
                 shape.shift = Shift
                 shape.dynamicCoordinate = 'x'
                 this.shapes.push(shape); 
                 const s =shape
             }
             else if(dynamicCoordinate === 'y'){
-                const shape = new Shape('rect',  undefined,         End,   undefined,    End - Start,      undefined,      id,    Type);
+                const shape = new Shape('rect',  undefined,         End,   undefined,    delta,      undefined,      id,    Type);
                 shape.shift = Shift
                 shape.dynamicCoordinate = 'y'
                 this.shapes.push(shape); 
@@ -199,8 +202,6 @@ class ShapeSet{
         this.PyToY = transform.PyToY.bind(transform)
     
     }
-
- 
 
 
     
@@ -248,6 +249,8 @@ class ShapeSet{
                 console.log('bfore calc coord '+ s.toString() + this.k +' ' +this.k_old)
 
                 //----------------------------------------------------------Dynamic: Recalculate dynamic coordinates, if scale changed
+                let applyDriftCompensationX = true
+                let applyDriftCompensationY = true
                 if(this.k_old != this.transform.k){
 
                     const logicalWidth  = canvas.width   * 0.9 / this.dynamicMaxShiftX
@@ -257,24 +260,31 @@ class ShapeSet{
                         if(s.dynamicCoordinate === 'x'){
                             s.width = logicalWidth / this.transform.k  
                             s.left =   s.shift * logicalWidth / this.transform.k  
-                            console.log('x - after calc coord \n'+ s.toString())
-
+                            applyDriftCompensationX = false
                         }
                         if(s.dynamicCoordinate === 'y'){
                             s.height = logicalHeight / this.transform.k    
-                            s.left = PyToY( (s.shift - 1) * logicalHeight   )
+                            s.left = s.shift * logicalHeight / this.transform.k
+                            applyDriftCompensationY = false
                         }
                     }
                 
                     this.k_old = this.transform.k
+
+                    if( this.transform.applyDriftCompensationX !== applyDriftCompensationX  )   {
+                        this.transform.applyDriftCompensationX = applyDriftCompensationX 
+                    }
+                    if( this.transform.applyDriftCompensationY !== applyDriftCompensationY  )   {
+                        this.transform.applyDriftCompensationY = applyDriftCompensationY 
+                    }
                     
                     
-                isVisibleHorizontally =  
-                    s.left + s.width - this.offsetBeforeBorderToDraw    >= t.visibleLeft &&
-                    s.left           + this.offsetBeforeBorderToDraw    <= t.visibleRight ;
-                isVisibleVertically =                 
-                    s.top + s.height - this.offsetBeforeBorderToDraw    >= t.visibleTop &&
-                    s.top            + this.offsetBeforeBorderToDraw    <= t.visibleBottom;
+                    isVisibleHorizontally =  
+                        s.left + s.width - this.offsetBeforeBorderToDraw    >= t.visibleLeft &&
+                        s.left           + this.offsetBeforeBorderToDraw    <= t.visibleRight ;
+                    isVisibleVertically =                 
+                        s.top + s.height - this.offsetBeforeBorderToDraw    >= t.visibleTop &&
+                        s.top            + this.offsetBeforeBorderToDraw    <= t.visibleBottom;
                }
 
             }
@@ -626,6 +636,9 @@ class ShapeSet{
                 // dynYmax = Math.max(dynYmax, s.top + s.height)
             }
         }
+
+        if(this.dynamicMaxShiftX > 0) this.dynamicMaxShiftX++
+        if(this.dynamicMaxShiftY > 0) this.dynamicMaxShiftY++
 
         // Запоминаем результат
         this.Xmin = xmin;

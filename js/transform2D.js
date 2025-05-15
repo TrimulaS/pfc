@@ -8,10 +8,8 @@ class Transform2D {
 	constructor(canvasElement, Xmin, Xmax, Ymin, Ymax) {
 		this.canvas = canvasElement;
 
-		// const ctx = canvasElement.getContext('2d');
-        // ctx.fillStyle = 'blue'
-        // ctx.fillRect(10, 10, 50, 50);
-
+		this.applyDriftCompensationX = true	// compensation of drift when sclaling (should be off when dynamic coordinates in use)
+		this.applyDriftCompensationY = true	// compensation of drift when sclaling (should be off when dynamic coordinates in use)
 
 		this.Wv = canvasElement.clientWidth;
 		this.Hv = canvasElement.clientHeight;
@@ -121,11 +119,20 @@ class Transform2D {
 		this.kOld = this.k;
 		this.k *= delta;
 
-		const driftCorrX = (this.Wv / 2 - this.pxShift) * (this.kOld - this.k) / this.kOld;
-		const driftCorrY = (this.Hv / 2 - this.pyShift) * (this.kOld - this.k) / this.kOld;
+		if (this.applyDriftCompensationX){
+			const driftCorrX = (this.Wv / 2 - this.pxShift) * (this.kOld - this.k) / this.kOld;
 
-		this.pxShift += driftCorrX;
-		this.pyShift += driftCorrY;
+			this.pxShift += driftCorrX;
+
+		}
+		if (this.applyDriftCompensationY){
+
+			const driftCorrY = (this.Hv / 2 - this.pyShift) * (this.kOld - this.k) / this.kOld;
+
+
+			this.pyShift += driftCorrY;
+		}
+
 
 		this.calcVisibleRanges();
 	}
@@ -136,19 +143,6 @@ class Transform2D {
 		this.canvas.height = this.canvas.clientHeight;
 		this.Wv = newW;
 		this.Hv = newH;
-	
-		// const visibleWidth = this.visibleRight - this.visibleLeft;
-		// const visibleHeight = this.visibleBottom - this.visibleTop;
-	
-		// this.k = Math.min(
-		// 	this.Wv / (visibleWidth + 2 * this.clearPadding),
-		// 	this.Hv / (visibleHeight + 2 * this.clearPadding)
-		// );
-		// this.kOld = this.k;
-	
-		// this.pxShift = -this.k * (this.visibleLeft - this.clearPadding);
-		// this.pyShift = -this.k * (this.visibleTop - this.clearPadding);
-	
 		this.calcVisibleRanges();
 
 	}

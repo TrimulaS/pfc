@@ -1,4 +1,4 @@
-const jsonData2D = {"eon":[
+const jsonData = {"eon":[
     { "id": "Фанерозой",                "Start": 541000,    "End": 0,         "Type": "Eon",  "Shift": 1,  "English": "Phanerozoic"       },
     { "id": "Протерозой",               "Start": 2500000,   "End": 541000,    "Type": "Eon",  "Shift": 1,  "English": "Proterozoic"       },
     { "id": "Архей",                    "Start": 4000000,   "End": 2500000,   "Type": "Eon",  "Shift": 1,  "English": "Archean"           },
