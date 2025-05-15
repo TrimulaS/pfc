@@ -54,7 +54,7 @@ ________________|
 	}
 	#c-tree {
 		display: flex;
-		flex-direction: column-reverse;
+		/* flex-direction: column-reverse; */
 	}
 
 	#c-tree p,
@@ -196,37 +196,36 @@ ________________|
 		// 1. Generate shape set
 		let shapesNum
 		let shapeSet
+		let t
 
 		
 
 		function generate(){
-			
+
+			// 1. Create shape set
 			shapeSet = new ShapeSet()
 
-			// Random fillup
+			// 2. Fillup
 			shapesNum = parseInt(inumberOfShapes.value);
 			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+			shapeSet.fillWithSquares(shapesNum)
+
+			// shapeSet.getFrom1DJsonArray(jsonData.eon)
+			// shapeSet.getFrom1DJsonArray(jsonData.era)
+			// shapeSet.getFrom1DJsonArray(jsonData.epoch)
+			// shapeSet.getFrom1DJsonArray(jsonData.period)
+			// shapeSet.getFrom1DJsonArray(jsonData.age)
+
+
+			// shapeSet.fillWithSquares(shapesNum)
+			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
+			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
 			
-
-			//Fill from JSON
-
-			shapeSet.getFrom1DJsonArray(jsonData.eon)
-			shapeSet.getFrom1DJsonArray(jsonData.era)
-			shapeSet.getFrom1DJsonArray(jsonData.epoch)
-			shapeSet.getFrom1DJsonArray(jsonData.period)
-			shapeSet.getFrom1DJsonArray(jsonData.age)
-
-
-
-			//shapeSet.fillWithSquares(shapesNum)
-		shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
-		shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
-			
-		// 	shapeSet.getFrom1DJsonArray([
-   		// { "id": "first",  "Start": -100,   "End": 500,    	 "Shift": 0,   "Type": "Period", "English": "Siderian"        },
-   		// { "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
-		// { "id": "third", "Start": 100,     "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
-		// 	])
+			// shapeSet.getFrom1DJsonArray([
+			// 	{ "id": "first",  "Start": -100,   "End": 500,    	 "Shift": 0,   "Type": "Period", "English": "Siderian"        },
+			// 	{ "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
+			// 	{ "id": "third", "Start": 100,     "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
+			// 		])
 
 			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.era)
@@ -234,42 +233,24 @@ ________________|
 			// shapeSet.getFrom2DJsonArray(jsonData2D.period)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.age)
 
-			// Fetch from JSON file (blocked by browser)
-			// fetch('data/data.json')
-			// .then(response => response.json())
-			// .then(jsonData => {
-			// 	const eonArray = data.eon;
-			// 	shapeSet.getFromJsonArray(jsonData.eon)
-			// 	const eraArray = data.era;
-			// 	const periodArray = data.period;
-			// 	const ageArray = data.age;
-			// });
+			// 3. Define borders
+			shapeSet.defineBoundaries()
 
+			// 4. Add trasformation model
+			t = new Transform2D(canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
+			shapeSet.setTransformModel(t)
 
+			// 5. Draw
+			shapeSet.draw();
+			// log('Shaps in set: ' + shapeSet.shapes.length)
 
-
-
-			log('Shpes in set: ' + shapeSet.shapes.length)
 			
-
-
-
-
+			
 		}
 		generate()
-		// 2. Set transform MediaSourceHandle
-		let t = new Transform2D(canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
-		shapeSet.setTransformModel(t)
+	
 
-		// const ctx = canvas.getContext('2d');
-        // ctx.fillStyle = 'blue'
-        // ctx.fillRect(10, 10, 50, 50);
-
-
-		log(shapeSet.toString())
-
-
-
+		//log(shapeSet.toString())
 	
 		
 		//Processing
@@ -278,8 +259,6 @@ ________________|
 			log(element.toString())
 			//console.log(element.toString()+'------------ ')
 		})
-
-
 
 
 
@@ -380,13 +359,16 @@ ________________|
 <!-- 
 ✓ Filtering shapes outside the viewport undesirable offset
 ✓ No mechanism fo do not process overlapped shapes -  not needed forthe moment (webGL)
+✓ dynamic scaling
+✓ grid x10 
+
 make relative coordinates not depandant from scale
 - spllitter returns after moving - listener conflicts
 
 1. Adding shapes depicting tie periods
 
 divisions corrctions: do not show near and overlapped divisions, titles out of borders
-- dynamic scaling
+
 -grid if all visibel shapes have border on it choos drk color. Grid test ovelapped with text and lines process values 1MA
 
 Input:

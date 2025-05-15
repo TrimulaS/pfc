@@ -129,7 +129,6 @@ class Transform2D {
 
 			const driftCorrY = (this.Hv / 2 - this.pyShift) * (this.kOld - this.k) / this.kOld;
 
-
 			this.pyShift += driftCorrY;
 		}
 

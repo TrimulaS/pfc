@@ -120,7 +120,7 @@ class ShapeSet{
 		for(let i = 0; i< shapesNum; i++){
 			this.shapes.push( new ShapeRandom (this.Xmin_i, this.Xmax_i, this.Ymin_i, this.Ymax_i))
 		}
-        this.defineBoundaries()
+        //this.defineBoundaries()
     }
 
     fillWithSquares(shapesNum){
@@ -136,7 +136,7 @@ class ShapeSet{
                 this.shapes.push( new Shape (type,undefined, this.Xmin_i + side * i, this.Ymin_i + side * j, side * 0.8 ,side * 0.8))
             }
 		}
-        this.defineBoundaries()
+        //this.defineBoundaries()
     }
 
     getFrom1DJsonArray(data){
@@ -169,7 +169,7 @@ class ShapeSet{
         });
 
 
-      this.defineBoundaries()
+        //this.defineBoundaries()
     }
 
     // calculateDynamicSizes() {
@@ -188,7 +188,7 @@ class ShapeSet{
             });
 
         
-        this.defineBoundaries()
+        // this.defineBoundaries()
     }
 
     // Mandatory before any first operation 
@@ -222,8 +222,6 @@ class ShapeSet{
         drawGrid(this.ctx, this.transform)
 
 
-    
-
         this.shapes.forEach(s => {
 
             // Нормализация координат при отрицательных ширине или высоте
@@ -246,7 +244,6 @@ class ShapeSet{
                 (   s.dynamicCoordinate === 'x' && isVisibleVertically)         ||      // Shape with x dynamic sizing      
                 (   s.dynamicCoordinate === 'y' && isVisibleHorizontally)               // Shape with y dynamic sizing    
             ){
-                console.log('bfore calc coord '+ s.toString() + this.k +' ' +this.k_old)
 
                 //----------------------------------------------------------Dynamic: Recalculate dynamic coordinates, if scale changed
                 let applyDriftCompensationX = true
@@ -309,9 +306,6 @@ class ShapeSet{
                 // log shapes
                 if (cbUpdateList.checked) addListItem(cTree, s.toString());
 
-                
-
-
 
                 //----------------------------------------------------------Drawing shapes
                 ctx.fillStyle = s.color;
@@ -349,16 +343,6 @@ class ShapeSet{
 
 
                 //----------------------------------------------------------Draw Title text
-                // Видимая область фигуры
-                // const visibleLeft   = Math.max(s.left, t.visibleLeft);
-                // const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
-                // const visibleTop    = Math.max(s.top, t.visibleTop);
-                // const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
-
-                // const visibleWidth  = visibleRight - visibleLeft;
-                // const visibleHeight = visibleBottom - visibleTop;
-
-
 
                 // Видимая часть фигуры (в пределах видимой области)
                 const visibleLeft   = Math.max(shapeLeft, t.visibleLeft);
@@ -539,61 +523,6 @@ class ShapeSet{
     }
 
 
-
-
-   
-    // defineBoundaries(){
-    //     //Define whole shapes bounds:
-	// 	this.Xmin = this.shapes[0].left
-	// 	this.Xmax = this.shapes[0].left + this.shapes[0].width
-	// 	this.Ymin = this.shapes[0].top
-	// 	this.Ymax = this.shapes[0].top  + this.shapes[0].height
-
-    //     console.log(this.shapes[0].toString())
-
-    //     let dynXmin = Infinity
-    //     let dynXmax = - Infinity
-    //     let dynYmin = Infinity
-    //     let dynYmax = -Infinity
-
-
-
-	// 	for(let i = 1; i< this.shapes.length; i++){
-	// 		const s = this.shapes[i]
-
-    //         console.log(s.toString())
-
-    //         // Rnages for all shapes
-	// 		if( this.Xmin > s.left) this.Xmin = s.left
-	// 		if( this.Xmax < s.left + s.width ) this.Xmax = s.left + s.width
-	// 		if( this.Ymin > s.top) this.Ymin = s.top
-	// 		if( this.Ymax < s.top + s.height ) this.Ymax = s.top + s.height
-            
-    //         // Ranges for dynamic shapes only
-    //         if(s.dynamicCoordinate =="x"){
-    //             this.dynamicMaxShiftY = Math.max(this.dynamicMaxShiftY, s.shift)
-    //             dynYmin = Math.min(dynYmin, s.top)
-    //             dynYmax = Math.max(dynYmax, s.top + s.height)
-
-    //             console.log(s.top+"---------"+s.height)
-
-    //         }
-    //         else if(s.dynamicCoordinate =="y"){
-    //             this.dynamicMaxShiftX= Math.max(this.dynamicMaxShiftX, s.shift)
-    //             dynXmin = Math.min(dynXmin, s.left)
-    //             dynXmax = Math.max(dynXmax, s.left + s.width)
-
-
-
-    //         }
-    //         this.dynamicMaxWidth = dynXmax - dynXmin
-    //         this.dynamicMaxHeight = dynYmax - dynYmin
-    //         console.log(`dynamicMaxWidth ${dynYmax}  dynamicMaxHeight ${dynYmin}`)
-    //         console.log(`dynamicMaxWidth ${this.dynamicMaxWidth}  dynamicMaxHeight ${this.dynamicMaxHeight}`)
-	// 	}
-		
-
-    // }
 
 
 
