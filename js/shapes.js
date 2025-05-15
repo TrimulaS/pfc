@@ -29,7 +29,7 @@ class Shape{
         };
     }
     toString(){
-        return `${this.id}, ${this.type}: (${this.left} : ${this.top})   ${this.width} x ${this.height}`
+        return `${this.id}, ${this.type}: left: ${this.left}, top: ${this.top}   width: ${this.width} x height ${this.height}  ${this.color}`
     }
 }
 
@@ -73,7 +73,7 @@ class ShapeRandom extends Shape {                       // Random generated shap
 //  2. Set transform model
 
 class ShapeSet{
-    minlSizeToDraw = 3
+    minSizeToDraw = 1
     offsetBeforeBorderToDraw = 0
     maxGridNumber = 20
 
@@ -87,9 +87,9 @@ class ShapeSet{
     shapes = []
 
     k_old = Infinity //previos coefficient src / viewport
-    dynamicMaxShiftX= 0
+    dynamicMaxShiftX = 0
     dynamicMaxShiftY = 0
-    dynamicMaxWidth = 0
+    dynamicMaxWidth  = 0
     dynamicMaxHeight = 0
 
     // Initial sizes to generate shapes
@@ -147,14 +147,14 @@ class ShapeSet{
             //shape constructor(          type,      color,   left = 0,    top = 0 ,   width = 10,     height = 10,     d='', notes = '')
 
             if(    dynamicCoordinate === 'x'){
-                const shape = new Shape('rect',  undefined,  undefined,         End,     undefined,     Start - End,     id,    Type);
+                const shape = new Shape('rect',  undefined,  undefined,         End,     undefined,     End - Start,     id,    Type);
                 shape.shift = Shift
                 shape.dynamicCoordinate = 'x'
                 this.shapes.push(shape); 
                 const s =shape
             }
             else if(dynamicCoordinate === 'y'){
-                const shape = new Shape('rect',  undefined,         End,   undefined,   Start - End,      undefined,      id,    Type);
+                const shape = new Shape('rect',  undefined,         End,   undefined,    End - Start,      undefined,      id,    Type);
                 shape.shift = Shift
                 shape.dynamicCoordinate = 'y'
                 this.shapes.push(shape); 
@@ -165,25 +165,13 @@ class ShapeSet{
 
         });
 
-      
+
       this.defineBoundaries()
     }
 
-    recalculateDynamicShapes() {
-        const canvas = this.transform.canvas;
-    
-        this.shapes.forEach(s => {
-            if (s.dynamicCoordinate === 'x') {
-                s.width = (canvas.width * 0.9) / this.dynamicMaxShiftX;
-                s.left = this.PxToX(s.shift * s.width);
-            } else if (s.dynamicCoordinate === 'y') {
-                s.height = (canvas.height * 0.9) / this.dynamicMaxShiftY;
-                s.top = this.PyToY(s.shift * s.height);
-            }
-        });
-    
-        this.k_old = this.transform.k;
-    }
+    // calculateDynamicSizes() {
+
+    // }
 
     getFrom2DJsonArray(data){
 
@@ -192,7 +180,7 @@ class ShapeSet{
             data.forEach(item => {
                 const { id, Start, End, Type, Shift } = item;
                 //constructor(type, color, left = 0, top = 0 , width = 10, height = 10,  id='', notes = '')
-                const shape = new Shape('rect', undefined, Shift*m, End, m, Start - End, id, Type);
+                const shape = new Shape('rect', undefined, Shift*m, End, m,  Math.abs(Start - End), id, Type);
                 this.shapes.push(shape); // Добавляем каждую фигуру отдельно
             });
 
@@ -218,52 +206,95 @@ class ShapeSet{
     
     draw() {
 
-        const{ctx:ctx, xToPx:xToPx , yToPy:yToPy, PxToX:PxToX, PyToY:PyToY} = this 
+        const{ctx:ctx, xToPx:xToPx , yToPy:yToPy, PxToX:PxToX, PyToY:PyToY, br:boundingRect} = this 
         const canvas = this.transform.canvas
     
-        canvas.width  = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-    
+        // canvas.width  = canvas.clientWidth;
+        // canvas.height = canvas.clientHeight;
+        // // Обновляем размеры и масштаб — в случае ресайза
+        // this.transform.Wv = this.transform.canvas.clientWidth;
+        // this.transform.Hv = this.transform.canvas.clientHeight;
+        // this.transform.calcVisibleRanges();
+            
         if (cbUpdateList.checked) cTree.innerHTML = '';
 
         drawGrid(this.ctx, this.transform)
+
+
     
 
         this.shapes.forEach(s => {
-            if (s.width * t.k < this.minlSizeToDraw   &&   s.height * t.k < this.minlSizeToDraw) return false;      // Skip tiny objects
-            const isVisibleHorizontally =  
-                s.left + s.width - this.offsetBeforeBorderToDraw    >= t.visibleLeft &&
-                s.left           + this.offsetBeforeBorderToDraw    <= t.visibleRight ;
-            const isVisibleVertically =                 
-                s.top + s.height - this.offsetBeforeBorderToDraw    >= t.visibleTop &&
-                s.top            + this.offsetBeforeBorderToDraw    <= t.visibleBottom;
 
+            // Нормализация координат при отрицательных ширине или высоте
+            const shapeLeft   = Math.min(s.left, s.left + s.width);
+            const shapeRight  = Math.max(s.left, s.left + s.width);
+            const shapeTop    = Math.min(s.top, s.top + s.height);
+            const shapeBottom = Math.max(s.top, s.top + s.height);
+
+            let isVisibleHorizontally =  
+                shapeRight  - this.offsetBeforeBorderToDraw >= t.visibleLeft &&
+                shapeLeft   + this.offsetBeforeBorderToDraw <= t.visibleRight;
+
+            let isVisibleVertically =                 
+                shapeBottom - this.offsetBeforeBorderToDraw >= t.visibleTop &&
+                shapeTop    + this.offsetBeforeBorderToDraw <= t.visibleBottom;
+
+
+            // If dynamic coordinate - recalculate
             if (
-                (   isVisibleHorizontally   && isVisibleVertically    )         ||      // Common 2D shape
                 (   s.dynamicCoordinate === 'x' && isVisibleVertically)         ||      // Shape with x dynamic sizing      
                 (   s.dynamicCoordinate === 'y' && isVisibleHorizontally)               // Shape with y dynamic sizing    
             ){
+                console.log('bfore calc coord '+ s.toString() + this.k +' ' +this.k_old)
 
-                // //----------------------------------------------------------Dynamic: Recalculate dynamic coordinates, if scale changed
-                // if(this.k_old != this.transform.k){
+                //----------------------------------------------------------Dynamic: Recalculate dynamic coordinates, if scale changed
+                if(this.k_old != this.transform.k){
 
-                //     const logicalWidth = this.PxToX(canvas.width * 0.9)
-                //     const logicalHeight = this.PyToY(canvas.height * 0.9)
+                    const logicalWidth  = canvas.width   * 0.9 / this.dynamicMaxShiftX
+                    const logicalHeight = canvas.height  * 0.9 / this.dynamicMaxShiftY
                 
-                //     for(const s of this.shapes){
-                //         if(s.dynamicCoordinate === 'x'){
-                //             s.width = logicalWidth / this.dynamicMaxShiftX
-                //             s.left = s.shift * s.width
-                //         }
-                //         if(s.dynamicCoordinate === 'y'){
-                //             s.height = logicalHeight / this.dynamicMaxShiftY
-                //             s.top = s.shift * s.height
-                //         }
-                //     }
+                    for(const s of this.shapes){
+                        if(s.dynamicCoordinate === 'x'){
+                            s.width = logicalWidth / this.transform.k  
+                            s.left =   s.shift * logicalWidth / this.transform.k  
+                            console.log('x - after calc coord \n'+ s.toString())
+
+                        }
+                        if(s.dynamicCoordinate === 'y'){
+                            s.height = logicalHeight / this.transform.k    
+                            s.left = PyToY( (s.shift - 1) * logicalHeight   )
+                        }
+                    }
                 
-                //     this.k_old = this.transform.k
-                //     this.defineBoundaries()
-                // }
+                    this.k_old = this.transform.k
+                    
+                    
+                isVisibleHorizontally =  
+                    s.left + s.width - this.offsetBeforeBorderToDraw    >= t.visibleLeft &&
+                    s.left           + this.offsetBeforeBorderToDraw    <= t.visibleRight ;
+                isVisibleVertically =                 
+                    s.top + s.height - this.offsetBeforeBorderToDraw    >= t.visibleTop &&
+                    s.top            + this.offsetBeforeBorderToDraw    <= t.visibleBottom;
+               }
+
+            }
+
+
+
+
+
+
+
+            // Drawing shape
+            if (s.width * t.k < this.minSizeToDraw   &&   s.height * t.k < this.minSizeToDraw) return false;      // Skip tiny objects
+
+
+            if (
+                (   isVisibleHorizontally   && isVisibleVertically    )        // ||      // Common 2D shape
+                // (   s.dynamicCoordinate === 'x' && isVisibleVertically)         ||      // Shape with x dynamic sizing      
+                // (   s.dynamicCoordinate === 'y' && isVisibleHorizontally)               // Shape with y dynamic sizing    
+            ){
+
 
                 // log shapes
                 if (cbUpdateList.checked) addListItem(cTree, s.toString());
@@ -309,14 +340,27 @@ class ShapeSet{
 
                 //----------------------------------------------------------Draw Title text
                 // Видимая область фигуры
-                const visibleLeft   = Math.max(s.left, t.visibleLeft);
-                const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
-                const visibleTop    = Math.max(s.top, t.visibleTop);
-                const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
+                // const visibleLeft   = Math.max(s.left, t.visibleLeft);
+                // const visibleRight  = Math.min(s.left + s.width, t.visibleRight);
+                // const visibleTop    = Math.max(s.top, t.visibleTop);
+                // const visibleBottom = Math.min(s.top + s.height, t.visibleBottom);
 
+                // const visibleWidth  = visibleRight - visibleLeft;
+                // const visibleHeight = visibleBottom - visibleTop;
+
+
+
+                // Видимая часть фигуры (в пределах видимой области)
+                const visibleLeft   = Math.max(shapeLeft, t.visibleLeft);
+                const visibleRight  = Math.min(shapeRight, t.visibleRight);
+                const visibleTop    = Math.max(shapeTop, t.visibleTop);
+                const visibleBottom = Math.min(shapeBottom, t.visibleBottom);
+
+                // Вычисление размеров видимой области
                 const visibleWidth  = visibleRight - visibleLeft;
                 const visibleHeight = visibleBottom - visibleTop;
 
+                // Центр
                 const px = xToPx(visibleLeft + visibleWidth / 2);
                 const py = yToPy(visibleTop + visibleHeight / 2);
 
@@ -364,10 +408,6 @@ class ShapeSet{
                         }
                     }
                 }
-
-
-
-
 
             }
         });
@@ -492,46 +532,115 @@ class ShapeSet{
 
 
    
-    defineBoundaries(){
-        //Define whole shapes bounds:
-		this.Xmin = this.shapes[0].left
-		this.Xmax = this.shapes[0].left + this.shapes[0].width
-		this.Ymin = this.shapes[0].top
-		this.Ymax = this.shapes[0].top  + this.shapes[0].height
+    // defineBoundaries(){
+    //     //Define whole shapes bounds:
+	// 	this.Xmin = this.shapes[0].left
+	// 	this.Xmax = this.shapes[0].left + this.shapes[0].width
+	// 	this.Ymin = this.shapes[0].top
+	// 	this.Ymax = this.shapes[0].top  + this.shapes[0].height
 
-        let dynXmin = Infinity
-        let dynXmax = -Infinity
-        let dynYmin = Infinity
-        let dynYmax = -Infinity
+    //     console.log(this.shapes[0].toString())
+
+    //     let dynXmin = Infinity
+    //     let dynXmax = - Infinity
+    //     let dynYmin = Infinity
+    //     let dynYmax = -Infinity
 
 
 
-		for(let i = 1; i< this.shapes.length; i++){
-			const s = this.shapes[i]
+	// 	for(let i = 1; i< this.shapes.length; i++){
+	// 		const s = this.shapes[i]
 
-            // Rnages for all shapes
-			if( this.Xmin > s.left) this.Xmin = s.left
-			if( this.Xmax < s.left + s.width ) this.Xmax = s.left + s.width
-			if( this.Ymin > s.top) this.Ymin = s.top
-			if( this.Ymax < s.top + s.height ) this.Ymax = s.top + s.height
+    //         console.log(s.toString())
+
+    //         // Rnages for all shapes
+	// 		if( this.Xmin > s.left) this.Xmin = s.left
+	// 		if( this.Xmax < s.left + s.width ) this.Xmax = s.left + s.width
+	// 		if( this.Ymin > s.top) this.Ymin = s.top
+	// 		if( this.Ymax < s.top + s.height ) this.Ymax = s.top + s.height
             
+    //         // Ranges for dynamic shapes only
+    //         if(s.dynamicCoordinate =="x"){
+    //             this.dynamicMaxShiftY = Math.max(this.dynamicMaxShiftY, s.shift)
+    //             dynYmin = Math.min(dynYmin, s.top)
+    //             dynYmax = Math.max(dynYmax, s.top + s.height)
+
+    //             console.log(s.top+"---------"+s.height)
+
+    //         }
+    //         else if(s.dynamicCoordinate =="y"){
+    //             this.dynamicMaxShiftX= Math.max(this.dynamicMaxShiftX, s.shift)
+    //             dynXmin = Math.min(dynXmin, s.left)
+    //             dynXmax = Math.max(dynXmax, s.left + s.width)
+
+
+
+    //         }
+    //         this.dynamicMaxWidth = dynXmax - dynXmin
+    //         this.dynamicMaxHeight = dynYmax - dynYmin
+    //         console.log(`dynamicMaxWidth ${dynYmax}  dynamicMaxHeight ${dynYmin}`)
+    //         console.log(`dynamicMaxWidth ${this.dynamicMaxWidth}  dynamicMaxHeight ${this.dynamicMaxHeight}`)
+	// 	}
+		
+
+    // }
+
+
+
+    defineBoundaries() {
+        if (!this.shapes || this.shapes.length === 0) {
+            this.boundingRect = null;
+            return;
+        }
+
+        let xmin = Infinity;
+        let xmax = -Infinity;
+        let ymin = Infinity;
+        let ymax = -Infinity;
+
+        for (const s of this.shapes) {
+            //console.log(`shape ${s.left} : ${s.width} .. ${s.top} : ${s.height}`);
+
+            // Нормализуем координаты
+            const left   = Math.min(s.left, s.left + s.width);
+            const right  = Math.max(s.left, s.left + s.width);
+            const top    = Math.min(s.top, s.top + s.height);
+            const bottom = Math.max(s.top, s.top + s.height);
+
+            xmin = Math.min(xmin, left);
+            xmax = Math.max(xmax, right);
+            ymin = Math.min(ymin, top);
+            ymax = Math.max(ymax, bottom);
+
+            //Dynamic coordinates
             // Ranges for dynamic shapes only
             if(s.dynamicCoordinate =="x"){
                 this.dynamicMaxShiftX= Math.max(this.dynamicMaxShiftX, s.shift)
-                dynXmin = Math.min(dynXmin, s.left)
-                dynXmax = Math.min(dynXmax, s.left + s.width)
+                // dynXmin = Math.min(dynXmin, s.left)
+                // dynXmax = Math.max(dynXmax, s.left + s.width)
 
             }
             else if(s.dynamicCoordinate =="y"){
                 this.dynamicMaxShiftY = Math.max(this.dynamicMaxShiftY, s.shift)
-                dynYmin = Math.min(dynYmin, s.top)
-                dynYmax = Math.min(dynYmax, s.top + s.height)
+                // dynYmin = Math.min(dynYmin, s.top)
+                // dynYmax = Math.max(dynYmax, s.top + s.height)
             }
-            this.dynamicMaxWidth = dynXmax - dynXmin
-            this.dynamicMaxHeight = dynYmax - dynYmin
-		}
-		
+        }
 
+        // Запоминаем результат
+        this.Xmin = xmin;
+        this.Xmax = xmax;
+        this.Ymin = ymin;
+        this.Ymax = ymax;
+
+        this.boundingRect = {
+            left: xmin,
+            top: ymin,
+            width: xmax - xmin,
+            height: ymax - ymin
+        };
+
+        //console.log(`Boundaries ${xmin} : ${ymin} .. ${xmax} : ${ymax} max Shift: ${this.dynamicMaxShiftX}`);
     }
 
     settings(drawGrid, adoptTextDirection){
@@ -548,7 +657,6 @@ class ShapeSet{
                 ? ` Dynamic vertical object level: ${this.dynamicMaxShiftY}, width: ${this.dynamicMaxHeight}` 
                 : '');
     }
-
 
 }
 

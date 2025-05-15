@@ -144,7 +144,7 @@ ________________|
 			<div class="container">
 				<div class="sidebar">
 					
-					<input type="number" id="numberOfShapes" value="100" min="0" max="10000" step="10" size="6">
+					<input type="number" id="numberOfShapes" value="2" min="0" max="10000" step="10" size="6">
 					<button id = 'b-Generate' class="button">Generate</button>
 					<button id = 'b-Reset' class="button">Reset</button>
 					<button id = 'b-Center' class="button">Center</button>
@@ -214,7 +214,18 @@ ________________|
 			// shapeSet.getFrom1DJsonArray(jsonData2D.period)
 			// shapeSet.getFrom1DJsonArray(jsonData2D.age)
 
-			shapeSet.fillWithSquares(shapesNum)
+
+
+			//shapeSet.fillWithSquares(shapesNum)
+		shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
+		shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
+			
+			shapeSet.getFrom1DJsonArray([
+   		{ "id": "first",  "Start": -100,   "End": 500,    "Shift": 0,   "Type": "Period", "English": "Siderian"        },
+   		{ "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
+		{ "id": "third", "Start": 100,      "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
+
+			])
 
 			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.era)
@@ -302,7 +313,7 @@ ________________|
 		const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
 				t.resize(canvas.clientWidth, canvas.clientHeight)
-				shapeSet.recalculateDynamicShapes();
+				//shapeSet.recalculateDynamicShapes();
 				shapeSet.draw()
                 //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
             }
