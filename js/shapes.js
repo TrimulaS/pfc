@@ -18,6 +18,14 @@ class Shape{
         this.dynamicCoordinate = undefined          // x or y
         
     }
+        // Геттеры для вычисления при доступе
+    get right() {
+        return this.left + this.width;
+    }
+
+    get bottom() {
+        return this.top + this.height;
+    }
     getBoundingClientRect(){
         return         {
             left: this.left,
@@ -29,7 +37,10 @@ class Shape{
         };
     }
     toString(){
-        return `${this.id}, ${this.type}: left: ${this.left}, top: ${this.top}   width: ${this.width} x height ${this.height}  ${this.color}`
+        // return `${this.id}, ${this.type}: left: ${this.left}, top: ${this.top}   width: ${this.width} x height ${this.height}  ${this.color}`
+        // Brief
+        // return `${this.id}, ${this.type}: ( ${shortNum(this.left)} : ${shortNum(this.top)} ),    ${shortNum(this.width)} x ${shortNum(this.height)}`
+        return `${this.id}: ( ${shortNum(this.left)} : ${shortNum(this.top)} )    ${shortNum(this.width)} x ${shortNum(this.height)}`
     }
 }
 
@@ -80,7 +91,8 @@ class ShapeSet{
     ctx = undefined
     
     // Settings:
-    drawGrid = true
+    drawGrid_x10 = false
+    drawAdoptedGrid = true
     adoptTextDirection = true
     
 
@@ -210,16 +222,16 @@ class ShapeSet{
         const{ctx:ctx, xToPx:xToPx , yToPy:yToPy, PxToX:PxToX, PyToY:PyToY, br:boundingRect} = this 
         const canvas = this.transform.canvas
     
-        // canvas.width  = canvas.clientWidth;
-        // canvas.height = canvas.clientHeight;
-        // // Обновляем размеры и масштаб — в случае ресайза
-        // this.transform.Wv = this.transform.canvas.clientWidth;
-        // this.transform.Hv = this.transform.canvas.clientHeight;
-        // this.transform.calcVisibleRanges();
             
         if (cbUpdateList.checked) cTree.innerHTML = '';
 
-        drawGrid(this.ctx, this.transform)
+        if(this.drawGrid_x10){
+            drawGrid_x10(this.ctx, this.transform)
+        }
+            
+        // For adopting grid
+        const xMap = new Map();
+        const yMap = new Map();
 
 
         this.shapes.forEach(s => {
@@ -288,19 +300,9 @@ class ShapeSet{
 
 
 
-
-
-
-
             // Drawing shape
             if (s.width * t.k < this.minSizeToDraw   &&   s.height * t.k < this.minSizeToDraw) return false;      // Skip tiny objects
-
-
-            if (
-                (   isVisibleHorizontally   && isVisibleVertically    )        // ||      // Common 2D shape
-                // (   s.dynamicCoordinate === 'x' && isVisibleVertically)         ||      // Shape with x dynamic sizing      
-                // (   s.dynamicCoordinate === 'y' && isVisibleHorizontally)               // Shape with y dynamic sizing    
-            ){
+            if ( isVisibleHorizontally && isVisibleVertically ){
 
 
                 // log shapes
@@ -403,12 +405,89 @@ class ShapeSet{
                     }
                 }
 
+                //Gather data for adopted grid
+                // 1. Encounterd shapes larger than text
+                if(this.drawAdoptedGrid){
+                    xMap.set(s.left, (xMap.get(s.left) || 0) + 1);
+                    xMap.set(s.right, (xMap.get(s.right) || 0) + 1);
+                    yMap.set(s.top, (yMap.get(s.top) || 0) + 1);
+                    yMap.set(s.bottom, (yMap.get(s.bottom) || 0) + 1);
+                }   
+
             }
+
+ 
+
         });
+        //----------------------------------------------------------Draw adopted Grid
+        if(this.drawAdoptedGrid){
+            // Функция для отображения делений
+            const drawDivisions = (map, isVertical) => {
+                // Сортируем по координате
+                const entries = Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
 
+                // Отфильтровываем, чтобы было не более 50 делений и не налезали подписи
+                const maxLabels = 50;
+                const filtered = [];
+                const minSpacing = (isVertical ? canvas.height : canvas.width) / maxLabels;
 
+                let lastPx = -Infinity;
+                for (const [coord, count] of entries) {
+                    const px = isVertical ? yToPy(coord) : xToPx(coord);
+                    if (Math.abs(px - lastPx) >= minSpacing) {
+                        filtered.push({ coord, count, px });
+                        lastPx = px;
+                    }
+                }
 
-    
+                const maxCount = Math.max(...filtered.map(f => f.count), 1);
+                const getColor = (count) => {
+                    const ratio = count / maxCount;
+                    // От светло-голубого (низкий count) до индиго (высокий)
+                    const r = Math.floor(173 - 100 * ratio);
+                    const g = Math.floor(216 - 100 * ratio);
+                    const b = Math.floor(230 - 140 * ratio);
+                    return `rgb(${r},${g},${b})`;
+                };
+
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.lineWidth = 1;
+
+                for (const { coord, count, px } of filtered) {
+                    const color = getColor(count);
+                    ctx.strokeStyle = color;
+                    ctx.fillStyle = color;
+
+                    let shortCoord = shortNum(coord)
+
+                    if (isVertical) {
+                        // горизонтальная линия
+                        ctx.beginPath();
+                        ctx.moveTo(0, px);
+                        ctx.lineTo(canvas.width, px);
+                        ctx.stroke();
+                        ctx.fillText(shortCoord, 20, px - 5);                     //coord.toPrecision(3)
+                        ctx.fillText(shortCoord, canvas.width - 20, px - 5);
+                    } else {
+                        // вертикальная линия
+                        ctx.beginPath();
+                        ctx.moveTo(px, 0);
+                        ctx.lineTo(px, canvas.height);
+                        ctx.stroke();
+                        ctx.fillText(shortCoord, px, 10);                         //coord.toPrecision(3)
+                        ctx.fillText(shortCoord, px, canvas.height - 10);
+                    }
+                }
+            };
+
+            drawDivisions(xMap, false); // вертикальные линии
+            drawDivisions(yMap, true);  // горизонтальные линии
+                    
+        }
+
+        //----------------------------------------------------------Draw adopted Grid
         // // 3. Прорисовка делений
         // // Функция подсчета, сколько фигур "касается" координаты
         // const countShapesTouching = (coord, axis) => {

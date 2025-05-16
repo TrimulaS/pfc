@@ -186,7 +186,7 @@ ________________|
 		const inumberOfShapes = document.getElementById('numberOfShapes');
 
 
-		new Split2().insertSplitter( cMain, 'row', 0.4);
+		new Split2().insertSplitter( cMain, 'row', 0.2);
 		new Split2().insertSplitter( cNodes, 'column', 0.7);
 
 		function rectToString(rect){
@@ -210,11 +210,11 @@ ________________|
 			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
 			shapeSet.fillWithSquares(shapesNum)
 
-			// shapeSet.getFrom1DJsonArray(jsonData.eon)
-			// shapeSet.getFrom1DJsonArray(jsonData.era)
-			// shapeSet.getFrom1DJsonArray(jsonData.epoch)
-			// shapeSet.getFrom1DJsonArray(jsonData.period)
-			// shapeSet.getFrom1DJsonArray(jsonData.age)
+			shapeSet.getFrom1DJsonArray(jsonData.eon)
+			shapeSet.getFrom1DJsonArray(jsonData.era)
+			shapeSet.getFrom1DJsonArray(jsonData.epoch)
+			shapeSet.getFrom1DJsonArray(jsonData.period)
+			shapeSet.getFrom1DJsonArray(jsonData.age)
 
 
 			// shapeSet.fillWithSquares(shapesNum)
@@ -362,8 +362,14 @@ ________________|
 ✓ dynamic scaling
 ✓ grid x10 
 
+- color of adopted grid
+- add processing shape as point with single pair coordinates only
+- add adopting grids optin with priority by shape edges crossection
 make relative coordinates not depandant from scale
 - spllitter returns after moving - listener conflicts
+- dinamic coordinates centering doesn't work
+
+- 
 
 1. Adding shapes depicting tie periods
 

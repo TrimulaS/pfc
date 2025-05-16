@@ -1,3 +1,4 @@
+// Finction to adopt grid values
 const formatNumber = (() => {
     const useSI = true;
     const SI = [
@@ -49,7 +50,44 @@ const formatNumber = (() => {
     };
 })();
 
-function drawGrid(ctx, transform) {
+function shortNum(num){
+    const SI = [
+        { value: 1e15, symbol: "P" },
+        { value: 1e12, symbol: "T" },
+        { value: 1e9,  symbol: "G" },
+        { value: 1e6,  symbol: "M" },
+        { value: 1e3,  symbol: "k" },
+        { value: 1,    symbol: ""  },
+        { value: 1e-3, symbol: "m" },
+        { value: 1e-6, symbol: "µ" },
+        { value: 1e-9, symbol: "n" },
+        { value: 1e-12,symbol: "π" },
+        { value: 1e-15,symbol: "f" }
+    ];
+
+    if (num === 0) return "0";
+
+    const absNum = Math.abs(num);
+    for (const { value, symbol } of SI) {
+        if (absNum >= value) {
+            const scaled = num / value;
+
+            // Сколько знаков после запятой нужно?
+            let digits = Math.abs(scaled) < 10 ? 1 : 0;
+            let str = scaled.toFixed(digits);
+
+            // Удаляем лишний ".0" в конце
+            if (str.endsWith('.0')) str = str.slice(0, -2);
+
+            return str + symbol;
+        }
+    }
+
+    // Если слишком малое число (меньше 1e-15)
+    return num.toExponential(1).replace(/\.0+/, '');
+}
+
+function drawGrid_x10(ctx, transform) {
     const canvas = transform.canvas;
     const maxXTicks = 20;
     const maxYTicks = 15;
