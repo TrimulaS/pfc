@@ -40,7 +40,8 @@ class Shape{
         // return `${this.id}, ${this.type}: left: ${this.left}, top: ${this.top}   width: ${this.width} x height ${this.height}  ${this.color}`
         // Brief
         // return `${this.id}, ${this.type}: ( ${shortNum(this.left)} : ${shortNum(this.top)} ),    ${shortNum(this.width)} x ${shortNum(this.height)}`
-        return `${this.id}: ( ${shortNum(this.left)} : ${shortNum(this.top)} )    ${shortNum(this.width)} x ${shortNum(this.height)}`
+        //return `${this.id}: ( ${shortNum(this.left)} : ${shortNum(this.top)} )    ${shortNum(this.width)} x ${shortNum(this.height)}`
+        return `${this.id}: ( ${formatNumber(this.left)} : ${formatNumber(this.top)} )    ${formatNumber(this.width)} x ${formatNumber(this.height)}`
     }
 }
 
@@ -74,8 +75,9 @@ class ShapeRandom extends Shape {                       // Random generated shap
         super(type, color, left, top, width, height, '-rnd');
     }
     static getColor(){
-        return  `rgba(${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.random().toFixed(2)})`;
-
+        // return  `rgba(${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.random().toFixed(2)})`;
+        // half transparent
+        return  `rgba(${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, ${Math.floor(255 * Math.random())}, 0.9)`;
     }
 }
 
@@ -84,17 +86,16 @@ class ShapeRandom extends Shape {                       // Random generated shap
 //  2. Set transform model
 
 class ShapeSet{
-    minSizeToDraw = 1
+    minSizeToDraw = 3
     offsetBeforeBorderToDraw = 0
     maxGridNumber = 20
 
     ctx = undefined
     
     // Settings:
-    drawGrid_x10 = false
-    drawAdoptedGrid = true
+    isDrawGrid_x10 = false
+    isDrawAdoptedGrid = true
     adoptTextDirection = true
-    
 
     shapes = []
 
@@ -115,11 +116,8 @@ class ShapeSet{
     Ymin = 0
     Ymax = 0
 
-    // Filling up shapes
-    constructor(){            // Canvas and method otrasforminf from source to viewport
 
-			
-    }
+
 
 
     fillRandomly(shapesNum, Xmin_i, Xmax_i, Ymin_i, Ymax_i){
@@ -132,7 +130,6 @@ class ShapeSet{
 		for(let i = 0; i< shapesNum; i++){
 			this.shapes.push( new ShapeRandom (this.Xmin_i, this.Xmax_i, this.Ymin_i, this.Ymax_i))
 		}
-        //this.defineBoundaries()
     }
 
     fillWithSquares(shapesNum){
@@ -148,7 +145,6 @@ class ShapeSet{
                 this.shapes.push( new Shape (type,undefined, this.Xmin_i + side * i, this.Ymin_i + side * j, side * 0.8 ,side * 0.8))
             }
 		}
-        //this.defineBoundaries()
     }
 
     getFrom1DJsonArray(data){
@@ -175,18 +171,9 @@ class ShapeSet{
                 this.shapes.push(shape); 
             }
 
-
-
-
         });
-
-
-        //this.defineBoundaries()
     }
 
-    // calculateDynamicSizes() {
-
-    // }
 
     getFrom2DJsonArray(data){
 
@@ -219,19 +206,25 @@ class ShapeSet{
     
     draw() {
 
-        const{ctx:ctx, xToPx:xToPx , yToPy:yToPy, PxToX:PxToX, PyToY:PyToY, br:boundingRect} = this 
+        const{ xToPx:xToPx , yToPy:yToPy, PxToX:PxToX, PyToY:PyToY, br:boundingRect} = this 
         const canvas = this.transform.canvas
     
             
         if (cbUpdateList.checked) cTree.innerHTML = '';
 
-        if(this.drawGrid_x10){
+        if(this.isDrawGrid_x10){
             drawGrid_x10(this.ctx, this.transform)
         }
             
         // For adopting grid
         const xMap = new Map();
         const yMap = new Map();
+
+        // === 1. Создание буферного канваса
+        const bufferCanvas = document.createElement('canvas');
+        bufferCanvas.width = canvas.width;
+        bufferCanvas.height = canvas.height;
+        const ctx = bufferCanvas.getContext('2d');
 
 
         this.shapes.forEach(s => {
@@ -407,7 +400,7 @@ class ShapeSet{
 
                 //Gather data for adopted grid
                 // 1. Encounterd shapes larger than text
-                if(this.drawAdoptedGrid){
+                if(this.isDrawAdoptedGrid){
                     xMap.set(s.left, (xMap.get(s.left) || 0) + 1);
                     xMap.set(s.right, (xMap.get(s.right) || 0) + 1);
                     yMap.set(s.top, (yMap.get(s.top) || 0) + 1);
@@ -420,72 +413,15 @@ class ShapeSet{
 
         });
         //----------------------------------------------------------Draw adopted Grid
-        if(this.drawAdoptedGrid){
-            // Функция для отображения делений
-            const drawDivisions = (map, isVertical) => {
-                // Сортируем по координате
-                const entries = Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
+        if(this.isDrawAdoptedGrid){
 
-                // Отфильтровываем, чтобы было не более 50 делений и не налезали подписи
-                const maxLabels = 50;
-                const filtered = [];
-                const minSpacing = (isVertical ? canvas.height : canvas.width) / maxLabels;
-
-                let lastPx = -Infinity;
-                for (const [coord, count] of entries) {
-                    const px = isVertical ? yToPy(coord) : xToPx(coord);
-                    if (Math.abs(px - lastPx) >= minSpacing) {
-                        filtered.push({ coord, count, px });
-                        lastPx = px;
-                    }
-                }
-
-                const maxCount = Math.max(...filtered.map(f => f.count), 1);
-                const getColor = (count) => {
-                    const ratio = count / maxCount;
-                    // От светло-голубого (низкий count) до индиго (высокий)
-                    const r = Math.floor(173 - 100 * ratio);
-                    const g = Math.floor(216 - 100 * ratio);
-                    const b = Math.floor(230 - 140 * ratio);
-                    return `rgb(${r},${g},${b})`;
-                };
-
-                ctx.font = '10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.lineWidth = 1;
-
-                for (const { coord, count, px } of filtered) {
-                    const color = getColor(count);
-                    ctx.strokeStyle = color;
-                    ctx.fillStyle = color;
-
-                    let shortCoord = shortNum(coord)
-
-                    if (isVertical) {
-                        // горизонтальная линия
-                        ctx.beginPath();
-                        ctx.moveTo(0, px);
-                        ctx.lineTo(canvas.width, px);
-                        ctx.stroke();
-                        ctx.fillText(shortCoord, 20, px - 5);                     //coord.toPrecision(3)
-                        ctx.fillText(shortCoord, canvas.width - 20, px - 5);
-                    } else {
-                        // вертикальная линия
-                        ctx.beginPath();
-                        ctx.moveTo(px, 0);
-                        ctx.lineTo(px, canvas.height);
-                        ctx.stroke();
-                        ctx.fillText(shortCoord, px, 10);                         //coord.toPrecision(3)
-                        ctx.fillText(shortCoord, px, canvas.height - 10);
-                    }
-                }
-            };
-
-            drawDivisions(xMap, false); // вертикальные линии
-            drawDivisions(yMap, true);  // горизонтальные линии
+            drawAdoptedGrid(xMap, this.ctx, this.transform, false); // вертикальные линии
+            drawAdoptedGrid(yMap, this.ctx, this.transform, true);  // горизонтальные линии
                     
         }
+
+        // === 4. Отрисовка буфера с фигурами поверх делений
+        this.ctx.drawImage(bufferCanvas, 0, 0);
 
         //----------------------------------------------------------Draw adopted Grid
         // // 3. Прорисовка делений

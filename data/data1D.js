@@ -3,8 +3,8 @@ const jsonData = {
 "eon":[
     { "id": "Фанерозой",                "Start": 541000,    "End": 0,            "Shift": 0,    "Type": "Eon",   "English": "Phanerozoic"       },
     { "id": "Протерозой",               "Start": 2500000,   "End": 541000,       "Shift": 0,    "Type": "Eon",   "English": "Proterozoic"       },
-    { "id": "Архей",                    "Start": 4000000,   "End": 2500000,      "Shift": 0,    "Type": "Eon",   "English": "Archean"           },
-    { "id": "Катархей (Гадей)",         "Start": 4600000,   "End": 4000000,      "Shift": 0,    "Type": "Eon",   "English": "Hadean"             } 
+    { "id": "Архей",                    "Start": 4031000,   "End": 2500000,      "Shift": 0,    "Type": "Eon",   "English": "Archean"           },
+    { "id": "Катархей (Гадей)",         "Start": 4600000,   "End": 4031000,      "Shift": 0,    "Type": "Eon",   "English": "Hadean"             } 
 ],
 "era":[    
     { "id": "Кайнозой",                 "Start": 66000,     "End": 0,            "Shift": 1,    "Type": "Era",   "English": "Cenozoic"          },
@@ -39,7 +39,7 @@ const jsonData = {
     { "id": "Калимий",                  "Start": 1600000,   "End": 1400000,      "Shift": 2,   "Type": "Period", "English": "Calymmian"       },
     { "id": "Статерий",                 "Start": 1800000,   "End": 1600000,      "Shift": 2,   "Type": "Period", "English": "Statherian"      },
     { "id": "Орозирий",                 "Start": 2050000,   "End": 1800000,      "Shift": 2,   "Type": "Period", "English": "Orosirian"       },
-    { "id": "Риасий",                   "Start": 2300000,   "End": 2050000,      "Shift": 2,   "Type": "Period", "English": "Rhyacian"        },
+    { "id": "Рясий",                   "Start": 2300000,   "End": 2050000,      "Shift": 2,   "Type": "Period", "English": "Rhyacian"        },
     { "id": "Сидерий",                  "Start": 2500000,   "End": 2300000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
 ],
 "epoch":[
