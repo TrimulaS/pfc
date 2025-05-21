@@ -5,26 +5,24 @@
  */
 
 class Transform2D {
-	constructor(canvasElement, Xmin, Xmax, Ymin, Ymax) {
-		this.canvas = canvasElement;
+	constructor(canvas, Xmin, Xmax, Ymin, Ymax, k) {
+		console.log(`4.1 Creating Trasform2D Xmin: ${Xmin},  Xmax: ${Xmax}, Ymin: ${Ymin},  Ymax: ${Ymax},  k: ${k}`)
+		this.canvas = canvas;
 
 		this.applyDriftCompensationX = true	// compensation of drift when sclaling (should be off when dynamic coordinates in use)
 		this.applyDriftCompensationY = true	// compensation of drift when sclaling (should be off when dynamic coordinates in use)
 
-		this.Wv = canvasElement.clientWidth;
-		this.Hv = canvasElement.clientHeight;
+		this.Wv = canvas.clientWidth;
+		this.Hv = canvas.clientHeight;
 
-		this.Xmin = Xmin;
-		this.Xmax = Xmax;
-		this.Ymin = Ymin;
-		this.Ymax = Ymax;
+		this.updateSourceCoord(Xmin, Xmax, Ymin, Ymax)
 
-		this.padding = 30;			//Padding for inintialcentring
+		this.paddingInit = 0.05;		// 5% Padding for inintialcentring in parts from whole size  (same for dynamic shapes in ShapeSet)
 		this.zoomFactor = 1.1;
-		this.clearPadding = 0;		// Padding for check clear
+		this.clearPadding = 0;		// Padding for check if shape in draw list
 
-		this.k = 1;
-		this.kOld = 1;
+		this.k = k;					// if defined 
+		this.k_old = k;
 
 		this.pxShift = 0;
 		this.pyShift = 0;
@@ -32,43 +30,87 @@ class Transform2D {
 		this.isDragging = false;
 		this.startX = 0;
 		this.startY = 0;
+		
+		if(typeof k === 'number' && isFinite(k)){		// If k alredy defineded (for dynamyc shapes)		k-> x -> k 
+			this.toCenterShift()
+		}
+		else{
+			this.toCenterScale()
+		}
+			
 
-		this.initScale();
 	}
 
-	initScale() {
+	updateSourceCoord(Xmin, Xmax, Ymin, Ymax) {
+		this.Xmin = Xmin;
+		this.Xmax = Xmax;
+		this.Ymin = Ymin;
+		this.Ymax = Ymax;
+	}
+
+	toCenterScale() {
+		console.log(`toCenterScale()`)
+		const { canvas, Xmin, Xmax, Ymin, Ymax, paddingInit: padding } = this;
+
+		this.Wv = canvas.clientWidth;
+		this.Hv = canvas.clientHeight;
+
+		const contentWidth  = Xmax - Xmin;
+		const contentHeight = Ymax - Ymin;
+
+		const paddingX = contentWidth  * padding;
+		const paddingY = contentHeight * padding;
+
+		const width = contentWidth + paddingX * 2;
+		const height = contentHeight + paddingY * 2;
+
+		this.k = Math.min(this.Wv / width, this.Hv / height);
+		this.k_old = this.k;
+
+		this.toCenterShift()				// Wv and Hv will duplicate
+
+		// const centerX = (Xmin + Xmax) / 2;
+		// const centerY = (Ymin + Ymax) / 2;
+
+		// this.pxShift = this.Wv / 2 - this.k * centerX;
+		// this.pyShift = this.Hv / 2 - this.k * centerY;
 
 
-		const { Xmin, Xmax, Ymin, Ymax, padding, Wv, Hv } = this;
+		console.log(`toCenterScale() contentWidth: ${contentWidth}		contentHeight: ${contentHeight}`)
 
-		const width = Xmax - Xmin + padding * 2;
-		const height = Ymax - Ymin + padding * 2;
-	
-		this.k = Math.min(Wv / width, Hv / height);
-		this.kOld = this.k;
-	
+	}
+
+
+
+
+	toCenterShift(){
+		console.log(`toCenterShift`)
+		const { canvas, Xmin, Xmax, Ymin, Ymax, paddingInit: padding, Wv, Hv } = this;
+
+		this.Wv = canvas.clientWidth;
+		this.Hv = canvas.clientHeight;
+
 		const centerX = (Xmin + Xmax) / 2;
 		const centerY = (Ymin + Ymax) / 2;
 	
-		this.pxShift = Wv / 2 - this.k * centerX;
-		this.pyShift = Hv / 2 - this.k * centerY;
-	
+		this.pxShift = this.Wv / 2 - this.k * centerX;
+		this.pyShift = this.Hv / 2 - this.k * centerY;
+
 		this.calcVisibleRanges();
 
 	}
-	centrlize(){
 
-		const { Xmin, Xmax, Ymin, Ymax, padding, Wv, Hv } = this;
+	calcVisibleRanges() {
+		console.log(`calcVisibleRanges`)
+		const { Wv, Hv, k, pxShift, pyShift, clearPadding } = this;
 
-		const width = Xmax - Xmin + padding * 2;
-		const height = Ymax - Ymin + padding * 2;
+		this.canvas.width = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientHeight;
 
-		const centerX = (Xmin + Xmax) / 2;
-		const centerY = (Ymin + Ymax) / 2;
-	
-		this.pxShift = Wv / 2 - this.k * centerX;
-		this.pyShift = Hv / 2 - this.k * centerY;
-
+		this.visibleLeft 	= (0 - pxShift) / k + clearPadding;
+		this.visibleTop 	= (0 - pyShift) / k + clearPadding;
+		this.visibleRight	= (Wv - pxShift) / k - clearPadding;
+		this.visibleBottom 	= (Hv - pyShift) / k - clearPadding;
 	}
 
 	// From source to viewport
@@ -87,17 +129,7 @@ class Transform2D {
 		return (py-this.pyShift) / this.k 
 	}
 
-	calcVisibleRanges() {
-		const { Wv, Hv, k, pxShift, pyShift, clearPadding } = this;
 
-		this.canvas.width = this.canvas.clientWidth;
-		this.canvas.height = this.canvas.clientHeight;
-
-		this.visibleLeft = (0 - pxShift) / k + clearPadding;
-		this.visibleTop = (0 - pyShift) / k + clearPadding;
-		this.visibleRight = (Wv - pxShift) / k - clearPadding;
-		this.visibleBottom = (Hv - pyShift) / k - clearPadding;
-	}
 
 	mouseDown(x, y) {
 		this.isDragging = true;
@@ -116,18 +148,18 @@ class Transform2D {
 
 	mouseWheel(deltaY) {
 		const delta = deltaY < 0 ? this.zoomFactor : 1 / this.zoomFactor;
-		this.kOld = this.k;
+		this.k_old = this.k;
 		this.k *= delta;
 
 		if (this.applyDriftCompensationX){
-			const driftCorrX = (this.Wv / 2 - this.pxShift) * (this.kOld - this.k) / this.kOld;
+			const driftCorrX = (this.Wv / 2 - this.pxShift) * (this.k_old - this.k) / this.k_old;
 
 			this.pxShift += driftCorrX;
 
 		}
 		if (this.applyDriftCompensationY){
 
-			const driftCorrY = (this.Hv / 2 - this.pyShift) * (this.kOld - this.k) / this.kOld;
+			const driftCorrY = (this.Hv / 2 - this.pyShift) * (this.k_old - this.k) / this.k_old;
 
 			this.pyShift += driftCorrY;
 		}

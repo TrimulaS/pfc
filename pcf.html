@@ -131,8 +131,7 @@ ________________|
 
 <!-- JSON file with data adopted to js to include locally -->
  	<script src = './data/data1D.js'>	</script>
-	<!-- <script src = './data/data2D.js'>	</script> -->
-	<!-- <script src = './data/data_s.js'>	</script> -->
+
 
 	<div id = 'pra'  class="flex-column">
 		<div class="flex-row">
@@ -203,29 +202,30 @@ ________________|
 		function generate(){
 
 			// 1. Create shape set
-			shapeSet = new ShapeSet()
+			shapeSet = new ShapeSet(canvas)
 
 			// 2. Fillup
 			shapesNum = parseInt(inumberOfShapes.value);
-			shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
-			shapeSet.fillWithSquares(shapesNum)
+			// shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+			// shapeSet.fillWithSquares(shapesNum)
 
-			shapeSet.getFrom1DJsonArray(jsonData.eon)
-			shapeSet.getFrom1DJsonArray(jsonData.era)
-			shapeSet.getFrom1DJsonArray(jsonData.epoch)
-			shapeSet.getFrom1DJsonArray(jsonData.period)
-			shapeSet.getFrom1DJsonArray(jsonData.age)
+			// shapeSet.getFrom1DJsonArray(jsonData.eon)
+			// shapeSet.getFrom1DJsonArray(jsonData.era)
+			// shapeSet.getFrom1DJsonArray(jsonData.epoch)
+			// shapeSet.getFrom1DJsonArray(jsonData.period)
+			// shapeSet.getFrom1DJsonArray(jsonData.age)
 
 
 			// shapeSet.fillWithSquares(shapesNum)
 			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
 			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
 			
-			// shapeSet.getFrom1DJsonArray([
-			// 	{ "id": "first",  "Start": -100,   "End": 500,    	 "Shift": 0,   "Type": "Period", "English": "Siderian"        },
-			// 	{ "id": "second", "Start": 0,      "End": 1000,      "Shift": 1,   "Type": "Period", "English": "Siderian"        },
-			// 	{ "id": "third", "Start": 100,     "End": 2000,      "Shift": 2,   "Type": "Period", "English": "Siderian"        }
-			// 		])
+			shapeSet.getFrom1DJsonArray([
+				{ "id": "s1 (-100,100)",  	"Start": -100,   	"End": 100,    	 "Shift": 0,   "Type": "Period", "English": "Positive heigth"        },
+				{ "id": "s2(0,500)", 		"Start": 0,      	"End": 500,      "Shift": 1,   "Type": "Period", "English": "Positive heigth"        },
+				{ "id": "n3(500,0)", 		"Start": 500,     	"End": 0,      "Shift": 2,   "Type": "Period", "English": "Positive heigth"        },
+				{ "id": "s3(-100,500)", 	"Start": -100,     	"End": 500,      "Shift": 3,   "Type": "Period", "English": "Negative heigth"        }
+					])
 
 			// shapeSet.getFrom2DJsonArray(jsonData2D.eon)
 			// shapeSet.getFrom2DJsonArray(jsonData2D.era)
@@ -235,12 +235,25 @@ ________________|
 
 			// 3. Define borders
 			shapeSet.defineBoundaries()
+			//log(shapeSet.toString())
 
-			// 4. Add trasformation model
-			t = new Transform2D(canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax);
+			// 4. Create trasformation model
+			t = new Transform2D(shapeSet.canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax, shapeSet.k_dyn);
 			shapeSet.setTransformModel(t)
 
-			// 5. Draw
+			// 5. Centralize (for dynamic shapes k already calculated)
+
+			t.toCenterShift()
+
+			// if(shapeSet.hasDynamicShapes){
+			// 	t.toCenterShift()
+			// }
+			// else{
+			// 	t.toCenterScale()
+			// }
+
+
+			// 6. Draw
 			shapeSet.draw();
 			// log('Shaps in set: ' + shapeSet.shapes.length)
 
@@ -289,18 +302,18 @@ ________________|
 			e.preventDefault();
 		});
 
-		// Resize canvas
-		const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-				t.resize(canvas.clientWidth, canvas.clientHeight)
-				//shapeSet.recalculateDynamicShapes();
-				shapeSet.draw()
-                //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
-            }
-        });
+		// // Resize canvas
+		// const resizeObserver = new ResizeObserver(entries => {
+        //     for (let entry of entries) {
+		// 		t.resize(canvas.clientWidth, canvas.clientHeight)
+		// 		//shapeSet.recalculateDynamicShapes();
+		// 		shapeSet.draw()
+        //         //console.log(`Размеры изменены: ширина = ${width}, высота = ${height}`);
+        //     }
+        // });
 
-        // Начинаем наблюдение за элементом
-        resizeObserver.observe(canvas);
+        // // Начинаем наблюдение за элементом
+        // resizeObserver.observe(canvas);
 
 		
 
@@ -327,11 +340,11 @@ ________________|
 			generate();
 		});
 		document.getElementById('b-Reset').addEventListener('click', function() {
-			t.initScale();
+			t.toCenterScale();
 			shapeSet.draw();
 		});
 		document.getElementById('b-Center').addEventListener('click', function() {
-			t.centrlize()
+			t.toCenterShift()
 			shapeSet.draw();
 
 		});
@@ -362,12 +375,21 @@ ________________|
 ✓ dynamic scaling
 ✓ grid x10 
 
+- !(!) CHeck width and height normalizaition for Shape
+
+- limit for visible dynamyc coordinates: if too much. automaic resort (newest bubble) 
+
+-dynamic coordinates not added to boundaries ans inital position calculation error
 - color of adopted grid
 - add processing shape as point with single pair coordinates only
 - add adopting grids optin with priority by shape edges crossection
 make relative coordinates not depandant from scale
 - spllitter returns after moving - listener conflicts
 - dinamic coordinates centering doesn't work
+- if k could be negative?
+- dynamic auto wrapped dynamic level (wrap and occupy space when real size visible)
+- modify  auto grid to exact and partial values if repeated
+
 
 - 
 
