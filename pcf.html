@@ -123,10 +123,12 @@ ________________|
 
 
 <body>
+	<script src = './js/2d/transform2D.js'>	</script>
+	<script src = './js/2d/set2D.js'>	</script>
 	<script src = './js/2d/aux.js'>	</script>
 	<script src = './js/2d/shapes.js'>	</script>
 	<script src = './js/split2.js'>	</script>
-	<script src = './js/2d/transform2D.js'>	</script>
+
 
 
 <!-- JSON file with data adopted to js to include locally -->
@@ -194,36 +196,40 @@ ________________|
 
 		// 1. Generate shape set
 		let shapesNum
-		let shapeSet
+		let set2D
 		let t
 
 		
 
 		function generate(){
 
-			// 1. Create shape set
-			shapeSet = new ShapeSet(canvas)
 
-			// 2. Fillup
+			// 1. Create trasformation model
+
+			// 2. Create shape set
+			set2D = new Set2D(canvas)
+
+			// 3. Import shapes 
+			sImporter = new ShapeImporter(set2D.shapes)
 			shapesNum = parseInt(inumberOfShapes.value);
-			// shapeSet.fillRandomly(shapesNum , 60, 1000 , 30, 500)
-			// shapeSet.fillWithSquares(shapesNum)
+			sImporter.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+			sImporter.fillWithSquares(shapesNum)
 
-			// shapeSet.getFrom1DJsonArray(jsonData.eon)
-			// shapeSet.getFrom1DJsonArray(jsonData.era)
-			// shapeSet.getFrom1DJsonArray(jsonData.epoch)
-			// shapeSet.getFrom1DJsonArray(jsonData.period)
-			// shapeSet.getFrom1DJsonArray(jsonData.age)
+			// sImporter.getFrom1DJsonArray(jsonData.eon)
+			// sImporter.getFrom1DJsonArray(jsonData.era)
+			// sImporter.getFrom1DJsonArray(jsonData.epoch)
+			// sImporter.getFrom1DJsonArray(jsonData.period)
+			// sImporter.getFrom1DJsonArray(jsonData.age)
 
 
-			// shapeSet.fillWithSquares(shapesNum)
+			// sImporter.fillWithSquares(shapesNum)
 			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -100, top = 0 , width = 50, height = 100,  'id', 'notes' ))
 			// shapeSet.shapes.push(new Shape ('rect', undefined, left = -50, top = 0 , width = 50, height = -100,  'id', 'notes' ))
 			
-			shapeSet.getFrom1DJsonArray([
+			sImporter.getFrom1DJsonArray([
 				{ "id": "s1 (-100,100)",  	"Start": -100,   	"End": 100,    	 "Shift": 0,   "Type": "Period", "English": "Positive heigth"        },
 				{ "id": "s2(0,500)", 		"Start": 0,      	"End": 500,      "Shift": 1,   "Type": "Period", "English": "Positive heigth"        },
-				{ "id": "n3(500,0)", 		"Start": 500,     	"End": 0,      "Shift": 2,   "Type": "Period", "English": "Positive heigth"        },
+				{ "id": "n3(500,0)", 		"Start": 500,     	"End": 0,      	 "Shift": 2,   "Type": "Period", "English": "Positive heigth"        },
 				{ "id": "s3(-100,500)", 	"Start": -100,     	"End": 500,      "Shift": 3,   "Type": "Period", "English": "Negative heigth"        }
 					])
 
@@ -234,16 +240,13 @@ ________________|
 			// shapeSet.getFrom2DJsonArray(jsonData2D.age)
 
 			// 3. Define borders
-			shapeSet.defineBoundaries()
+			set2D.initSet()
 			//log(shapeSet.toString())
 
-			// 4. Create trasformation model
-			t = new Transform2D(shapeSet.canvas, shapeSet.Xmin, shapeSet.Xmax, shapeSet.Ymin, shapeSet.Ymax, shapeSet.k_dyn);
-			shapeSet.setTransformModel(t)
 
 			// 5. Centralize (for dynamic shapes k already calculated)
 
-			t.toCenterShift()
+			//t.toCenterShift()
 
 			// if(shapeSet.hasDynamicShapes){
 			// 	t.toCenterShift()
@@ -254,10 +257,8 @@ ________________|
 
 
 			// 6. Draw
-			shapeSet.draw();
+			set2D.draw();
 			// log('Shaps in set: ' + shapeSet.shapes.length)
-
-			
 			
 		}
 		generate()
@@ -267,7 +268,7 @@ ________________|
 	
 		
 		//Processing
-		shapeSet.shapes.forEach(element =>{
+		set2D.shapes.forEach(element =>{
 			//ta.textContent += element.toString()
 			log(element.toString())
 			//console.log(element.toString()+'------------ ')
@@ -278,27 +279,27 @@ ________________|
 
 		// Add listeners
 		canvas.addEventListener('mousedown', (e) => {
-			t.mouseDown(e.clientX ,  e.clientY)
+			set2D.mouseDown(e.clientX ,  e.clientY)
 		});
 
 		canvas.addEventListener('mousemove', (e) => {
-			if(t.isDragging ){
-				t.mouseMove( e.clientX, e.clientY )
-				shapeSet.draw();
+			if(set2D.isDragging ){
+				set2D.mouseMove( e.clientX, e.clientY )
+				set2D.draw();
 			}
 		});
 
 		canvas.addEventListener('mouseup', () => {
-			t.isDragging = false;
+			set2D.isDragging = false;
 		});
 
 		canvas.addEventListener('mouseleave', () => {
-			t.isDragging = false;
+			set2D.isDragging = false;
 		});
 
 		canvas.addEventListener('wheel', (e) => {
-			t.mouseWheel(e.deltaY)
-			shapeSet.draw();
+			set2D.mouseWheel(e.deltaY)
+			set2D.draw();
 			e.preventDefault();
 		});
 
@@ -340,28 +341,28 @@ ________________|
 			generate();
 		});
 		document.getElementById('b-Reset').addEventListener('click', function() {
-			t.toCenterScale();
-			shapeSet.draw();
+			set2D.toCenterScale();
+			set2D.draw();
 		});
 		document.getElementById('b-Center').addEventListener('click', function() {
-			t.toCenterShift()
-			shapeSet.draw();
+			set2D.toCenterShift()
+			set2D.draw();
 
 		});
 		document.getElementById('b-ReCreate').addEventListener('click', function() {
 			// t = new Transform2D(canvas, Xmin, Xmax, Ymin, Ymax);
-			shapeSet.draw();
+			set2D.draw();
 			//alert('Hello');
 		});
 		cbDrawGrid.addEventListener('change', function() {
-			shapeSet.settings(this.checked);
+			set2D.settings(this.checked);
 		});
 		cbTextDirection.addEventListener('change', function() {
-			shapeSet.settings(undefined, this.checked);
+			set2D.settings(undefined, this.checked);
 		});
 
 
-		shapeSet.settings(cbDrawGrid.checked, cbTextDirection.checked);
+		set2D.settings(cbDrawGrid.checked, cbTextDirection.checked);
 	</script>
 
 	

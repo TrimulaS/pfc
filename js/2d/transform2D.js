@@ -5,8 +5,8 @@
  */
 
 class Transform2D {
-	constructor(canvas, Xmin, Xmax, Ymin, Ymax, k) {
-		console.log(`4.1 Creating Trasform2D Xmin: ${Xmin},  Xmax: ${Xmax}, Ymin: ${Ymin},  Ymax: ${Ymax},  k: ${k}`)
+	constructor( canvas ) {
+		console.log(`1 Creating Trasform2D `)
 		this.canvas = canvas;
 
 		this.applyDriftCompensationX = true	// compensation of drift when sclaling (should be off when dynamic coordinates in use)
@@ -15,30 +15,23 @@ class Transform2D {
 		this.Wv = canvas.clientWidth;
 		this.Hv = canvas.clientHeight;
 
-		this.updateSourceCoord(Xmin, Xmax, Ymin, Ymax)
 
-		this.paddingInit = 0.05;		// 5% Padding for inintialcentring in parts from whole size  (same for dynamic shapes in ShapeSet)
-		this.zoomFactor = 1.1;
-		this.clearPadding = 0;		// Padding for check if shape in draw list
-
-		this.k = k;					// if defined 
-		this.k_old = k;
+		this.k = 1;					// if defined 
+		this.k_old = 1.1;
 
 		this.pxShift = 0;
 		this.pyShift = 0;
 
+		// local fiels
+		this.paddingInit = 0.05;		// 5% Padding for inintialcentring in parts from whole size  (same for dynamic shapes in ShapeSet)
+		this.zoomFactor = 1.1;
+		this.clearPadding = 0;		// Padding for check if shape in draw list
+
+		
 		this.isDragging = false;
 		this.startX = 0;
 		this.startY = 0;
 		
-		if(typeof k === 'number' && isFinite(k)){		// If k alredy defineded (for dynamyc shapes)		k-> x -> k 
-			this.toCenterShift()
-		}
-		else{
-			this.toCenterScale()
-		}
-			
-
 	}
 
 	updateSourceCoord(Xmin, Xmax, Ymin, Ymax) {
@@ -48,7 +41,10 @@ class Transform2D {
 		this.Ymax = Ymax;
 	}
 
-	toCenterScale() {
+		
+	
+	toCenterScale() {							// Set the shift to align the center of the source with the center of the viewport.
+		
 		console.log(`toCenterScale()`)
 		const { canvas, Xmin, Xmax, Ymin, Ymax, paddingInit: padding } = this;
 
@@ -66,26 +62,16 @@ class Transform2D {
 
 		this.k = Math.min(this.Wv / width, this.Hv / height);
 		this.k_old = this.k;
-
-		this.toCenterShift()				// Wv and Hv will duplicate
-
-		// const centerX = (Xmin + Xmax) / 2;
-		// const centerY = (Ymin + Ymax) / 2;
-
-		// this.pxShift = this.Wv / 2 - this.k * centerX;
-		// this.pyShift = this.Hv / 2 - this.k * centerY;
-
+		
 
 		console.log(`toCenterScale() contentWidth: ${contentWidth}		contentHeight: ${contentHeight}`)
 
 	}
 
+	toCenterShift(){					// Set the shift to align the center of the source with the center of the viewport.
 
-
-
-	toCenterShift(){
 		console.log(`toCenterShift`)
-		const { canvas, Xmin, Xmax, Ymin, Ymax, paddingInit: padding, Wv, Hv } = this;
+		const { canvas, k, Xmin, Xmax, Ymin, Ymax, paddingInit: padding, Wv, Hv } = this;
 
 		this.Wv = canvas.clientWidth;
 		this.Hv = canvas.clientHeight;
@@ -93,34 +79,45 @@ class Transform2D {
 		const centerX = (Xmin + Xmax) / 2;
 		const centerY = (Ymin + Ymax) / 2;
 	
-		this.pxShift = this.Wv / 2 - this.k * centerX;
-		this.pyShift = this.Hv / 2 - this.k * centerY;
+		this.pxShift = this.Wv / 2 - k * centerX;
+		this.pyShift = this.Hv / 2 - k * centerY;
+
+		console.log(`pxShift ${this.pxShift}   k ${k} Wv ${Wv}  Xmin ${Xmin }   Xmax ${Xmax }   centerX ${centerX}  centerX ${centerX} `)
+	
 
 		this.calcVisibleRanges();
 
 	}
 
-	calcVisibleRanges() {
-		console.log(`calcVisibleRanges`)
-		const { Wv, Hv, k, pxShift, pyShift, clearPadding } = this;
+	toCenter(){
+		console.log(`transform x = ${this.Xmin} .. ${this.Xmax} \n          y = ${this.Ymin} .. ${this.Ymax}`)
+		this.toCenterShift()				// Wv and Hv will duplicate
+		this.toCenterShift()
+	}
+	
 
-		this.canvas.width = this.canvas.clientWidth;
-		this.canvas.height = this.canvas.clientHeight;
+	calcVisibleRanges() {
+		
+		const { canvas, Wv, Hv, k, pxShift, pyShift, clearPadding } = this;
+
+		this.canvas.width  = canvas.clientWidth;
+		this.canvas.height = canvas.clientHeight;
 
 		this.visibleLeft 	= (0 - pxShift) / k + clearPadding;
 		this.visibleTop 	= (0 - pyShift) / k + clearPadding;
 		this.visibleRight	= (Wv - pxShift) / k - clearPadding;
 		this.visibleBottom 	= (Hv - pyShift) / k - clearPadding;
+		console.log(`calcVisibleRanges: (${this.visibleLeft} , ${this.visibleTop} )  ..  ( ${this.visibleRight} , ${this.visibleBottom} )`)
+		
 	}
-
 	// From source to viewport
 	xToPx(x) {
 		return this.pxShift + this.k * x;
 	}
-
 	yToPy(y) {
 		return this.pyShift + this.k * y;
 	}
+
 	//From Viewport to source
 	PxToX(px){
 		return (px-this.pxShift) / this.k 
@@ -144,6 +141,8 @@ class Transform2D {
 		this.startY = y;
 
 		this.calcVisibleRanges();
+
+		//console.log(`x ${x}  this.pxShift ${this.pxShift} `)
 	}
 
 	mouseWheel(deltaY) {
@@ -163,8 +162,6 @@ class Transform2D {
 
 			this.pyShift += driftCorrY;
 		}
-
-
 		this.calcVisibleRanges();
 	}
 

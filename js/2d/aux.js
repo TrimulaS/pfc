@@ -59,6 +59,8 @@ const formatNumber = (() => {
 
 //------------------------------------------------------------------------------- Draw standard x10 grid
 function drawGrid_x10(ctx, transform) {
+
+    console.log( `Draw grid x10`)
     const canvas = transform.canvas;
     const maxXTicks = 20;
     const maxYTicks = 15;
