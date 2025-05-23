@@ -138,10 +138,17 @@ ________________|
 	<div id = 'pra'  class="flex-column">
 		<div class="flex-row">
 			<label>
-                <input type="checkbox" id="cb-UpdateList" checked="checked">Update List
-				<input type="checkbox" id="cb-text-direction" checked="checked">Adopt text direction
-				<input type="checkbox" id="cb-draw-grid" checked="checked">Grid
-            </label>
+				<input type="checkbox" id="cb-UpdateList" checked="checked"> Update List
+			</label>
+			<label>
+				<input type="checkbox" id="cb-text-direction" checked="checked"> Adopt text direction
+			</label>
+			<label>
+				<input type="checkbox" id="cb-draw-grid-x10"> Grid
+			</label>
+			<label>
+				<input type="checkbox" id="cb-draw-grid-adopted" checked="checked"> Grid
+			</label>
 
 		</div>
 		<div id = 'c-main' class="container">
@@ -179,7 +186,9 @@ ________________|
 		const cMain = document.getElementById('c-main');
 		const cbUpdateList = document.getElementById('cb-UpdateList');
 		const cbTextDirection = document.getElementById('cb-text-direction');
-		const cbDrawGrid= document.getElementById('cb-draw-grid');
+		const cbDrawGridx10= document.getElementById('cb-draw-grid-x10');
+		const cbDrawGridAdopted= document.getElementById('cb-draw-grid-adopted');
+
 		const cNodes = document.getElementById('c-nodes');
 		const cTree = document.getElementById('c-tree');
 		const cLog = document.getElementById('c-log');
@@ -212,8 +221,8 @@ ________________|
 			// 3. Import shapes 
 			sImporter = new ShapeImporter(set2D.shapes)
 			shapesNum = parseInt(inumberOfShapes.value);
-			sImporter.fillRandomly(shapesNum , 60, 1000 , 30, 500)
-			sImporter.fillWithSquares(shapesNum)
+			// sImporter.fillRandomly(shapesNum , 60, 1000 , 30, 500)
+			// sImporter.fillWithSquares(shapesNum)
 
 			// sImporter.getFrom1DJsonArray(jsonData.eon)
 			// sImporter.getFrom1DJsonArray(jsonData.era)
@@ -354,15 +363,18 @@ ________________|
 			set2D.draw();
 			//alert('Hello');
 		});
-		cbDrawGrid.addEventListener('change', function() {
+		cbDrawGridx10.addEventListener('change', function() {
 			set2D.settings(this.checked);
 		});
+		cbDrawGridAdopted.addEventListener('change', function() {
+			set2D.settings(undefined,this.checked);
+		});
 		cbTextDirection.addEventListener('change', function() {
-			set2D.settings(undefined, this.checked);
+			set2D.settings(undefined, undefined, this.checked);
 		});
 
 
-		set2D.settings(cbDrawGrid.checked, cbTextDirection.checked);
+		set2D.settings(cbDrawGridx10.checked,cbDrawGridAdopted.checked, cbTextDirection.checked);
 	</script>
 
 	
@@ -390,6 +402,7 @@ make relative coordinates not depandant from scale
 - if k could be negative?
 - dynamic auto wrapped dynamic level (wrap and occupy space when real size visible)
 - modify  auto grid to exact and partial values if repeated
+- transfer number formatin to clas to track previos numbers and select accuracy
 
 
 - 

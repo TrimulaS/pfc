@@ -12,17 +12,18 @@ class Set2D extends Transform2D{
 
     ctx = undefined
 
-    k_old_draw = undefined                   // previos coefficient src / viewport  to decide if dyn coord should be recalculated while drawing
+    k_last_dyn_calc = undefined                   // previos coefficient src / viewport  to decide if dyn coord should be recalculated while drawing
     // k_dyn = undefined                    // in case of dynamic shapes define coefficient to conatain real size and cacaulate first dynamic coordinates
 
     hasDynamicShapes = false            // To exclude additional cofficient adoptation transform.init / transform centralize instead
-    dynX_count = 0
-    dynY_count = 0
+    dynX_Lvl = 0
+    dynY_Lvl = 0
 
     // Settings:
-    isDrawGrid_x10 = true
-    isDrawAdoptedGrid = true
+    drawGridx10 = false
+    drawGridAdopted = true
     adoptTextDirection = true
+
 
 
     // Result boundaries (! shoild be updated to transform)
@@ -30,17 +31,6 @@ class Set2D extends Transform2D{
 
     constructor(canvas){
         super(canvas)
-        // this.transform = transform
-   
-        // this.canvas = this.transform.canvas
-        // this.Xmin   = this.transform.Xmin
-        // this.Xmax   = this.transform.Xmax
-        // this.Ymin   = this.transform.Ymin
-        // this.Ymax   = this.transform.Ymax
-        // this.xToPx  = super.xToPx.bind(transform)			// Binding methods for convinience
-        // this.yToPy  = super.yToPy.bind(transform)
-        // this.PxToX  = super.PxToX.bind(transform)			// Binding methods for convinience
-        // this.PyToY  = super.PyToY.bind(transform)
 
         this.ctx = this.canvas.getContext('2d');
 
@@ -55,6 +45,8 @@ class Set2D extends Transform2D{
 
     initSet() {                                         // When set filled with shapes define borders and 
         console.log(`4. InitSet() Define borders`)
+        this.applyDriftCompensationX = true
+        this.applyDriftCompensationY = true
 
         let xmin =  Infinity;
         let xmax = -Infinity;
@@ -70,9 +62,9 @@ class Set2D extends Transform2D{
 
         // For dynamic coord: finding maximum level, for static coordinate: find max ranges to calculate prliminary coefficient k
         for (const s of this.shapes) {
-            console.log("shape entry:", s);
+            //console.log("shape entry:", s);
             //Dynamic coordinates
-            if(s.dynamicCoordinate ==="x"){                         // Dynamic x
+            if(s.dynamicCoordinate ==="x"){                                 // Dynamic x
                 // Dynamic part finding levels
                 dinX_Lvl_min = Math.min(dinX_Lvl_min, s.shift);
                 dinX_Lvl_max = Math.max(dinX_Lvl_max, s.shift);
@@ -81,8 +73,9 @@ class Set2D extends Transform2D{
                 ymin = Math.min(ymin, Math.min(s.top, s.top + s.height) );
                 ymax = Math.max(ymax, Math.max(s.top, s.top + s.height) );
 
+                this.applyDriftCompensationX = false
             }
-            else if(s.dynamicCoordinate ==="y"){                         // Dynamic y
+            else if(s.dynamicCoordinate ==="y"){                            // Dynamic y
                 // Dynamic part finding levels
                 dinY_Lvl_min = Math.min(dinY_Lvl_min, s.shift);
                 dinY_Lvl_max = Math.max(dinY_Lvl_max, s.shift);
@@ -90,7 +83,8 @@ class Set2D extends Transform2D{
                 // Static part
                 xmin = Math.min(xmin, Math.min(s.left, s.left + s.width) );
                 xmax = Math.max(xmax, Math.max(s.left, s.left + s.width) );
-
+                
+                this.applyDriftCompensationY = false
             }
             else{                                                          // Real coordinates
                 xmin = Math.min(xmin, Math.min(s.left, s.left + s.width) );
@@ -101,31 +95,45 @@ class Set2D extends Transform2D{
             }
         }
 
-        // const dynWidth = dinX_max - dinX_min 
-        // const dynHeight = dinY_max - dinY_min
-
-        // console.log(`3.1 Dynamic coordinates: defined ranges dynWidth: ${dynWidth}     dynHeight: ${dynHeight}`)
-
-        // For the case when dynamic coorduinates present, recalculate it 
+        // FIf dynamic coorduinates present, calc number of levels 
         if (dinX_Lvl_min !== Infinity && dinX_Lvl_max !== -Infinity) {
-            this.dynX_count = dinX_Lvl_max - dinX_Lvl_min + 1
+            this.dynX_Lvl = dinX_Lvl_max - dinX_Lvl_min + 1
             this.hasDynamicShapes = true
         } else {
-            this.dynX_count = 0 // Ни одного числового значения не встретилось
+            this.dynX_Lvl = 0 // Ни одного числового значения не встретилось
         }
 
         if (dinY_Lvl_min !== Infinity && dinY_Lvl_max !== -Infinity) {
-            this.dynY_count = dinY_Lvl_max - dinY_Lvl_min + 1
+            this.dynY_Lvl = dinY_Lvl_max - dinY_Lvl_min + 1
             this.hasDynamicShapes = true
         } else {
-            this.dynY_count = 0 // Ни одного числового значения не встретилось
+            this.dynY_Lvl = 0 // Ни одного числового значения не встретилось
         }
 
         //????????????????????????????????????
-        if ( xmin ==  Infinity) xmin = 0
-        if ( xmax == -Infinity) xmax = 0
-        if ( ymin ==  Infinity) ymin = 0
-        if ( ymax == -Infinity) ymax = 0
+        // if ( xmin ==  Infinity) xmin = 0
+        // if ( xmax == -Infinity) xmax = 0
+        // if ( ymin ==  Infinity) ymin = 0
+        // if ( ymax == -Infinity) ymax = 0
+
+
+        this.Xmin = xmin;
+        this.Xmax = xmax;
+        this.Ymin = ymin;
+        this.Ymax = ymax;
+        // define k
+        this.toCenterScale()
+
+
+        // If dynamic coordinates exists - calculate it:
+        if(this.hasDynamicShapes){
+            this.calcDynamicCoordinates()
+        }
+
+        // 3.5 Define all shapes area
+        // this.k_dyn = k_dyn
+
+        this.toCenterShift()
 
 
         // // 1.2 Dynamic coordinates: calculate traslate coefficients and choose least to make whole are fit to vewport
@@ -152,7 +160,7 @@ class Set2D extends Transform2D{
 
 
     //     console.log(`3.2 Coefficients: dynKx =  ${k_dynX}  dynKy =  ${k_dynY}  dynK =  ${k_dyn}`)
-    //     console.log(`3.2.1 dynX_count: ${this.dynX_count}  dynY_count: ${this.dynY_count}   dynWidth ${dynWidth} dynHeight ${dynHeight}`)
+    //     console.log(`3.2.1 dynX_Lvl: ${this.dynX_Lvl}  dynY_Lvl: ${this.dynY_Lvl}   dynWidth ${dynWidth} dynHeight ${dynHeight}`)
        
     //     // 3.3 Dynamic coordinates: Calculate borders of each lvl to fit viewport
     //     // Logical width in veiwport to fit all the levels of dynamic shapes
@@ -167,8 +175,8 @@ class Set2D extends Transform2D{
 
         // this.calcDynamicCoordinates(k_dyn)
 
-        // // this.logicalWidth  = canvas.width   * (1 - this.paddingInit ) / this.dynX_count
-        // // this.logicalHeight = canvas.height  * (1 - this.paddingInit ) / this.dynY_count
+        // // this.logicalWidth  = canvas.width   * (1 - this.paddingInit ) / this.dynX_Lvl
+        // // this.logicalHeight = canvas.height  * (1 - this.paddingInit ) / this.dynY_Lvl
 
         // for (const s of this.shapes) {
 
@@ -186,12 +194,7 @@ class Set2D extends Transform2D{
 
         // }
 
-        // 3.5 Define all shapes area
-        // this.k_dyn = k_dyn
-        this.Xmin = xmin;
-        this.Xmax = xmax;
-        this.Ymin = ymin;
-        this.Ymax = ymax;
+
         // And Update to transfor if it is already defined
 
 
@@ -214,10 +217,11 @@ class Set2D extends Transform2D{
 
 
         console.log(`Boundaries x = ${this.Xmin} .. ${this.Xmax} \n          y = ${this.Ymin} .. ${this.Ymax = ymax} \n 
-                    dyn X: ${this.dynX_count}  dyn y: ${this.dynY_count}\
-                    dyn Lvl X: ${this.dynX_count}  dyn y: ${this.dynY_count}`);
+                    dyn X: ${this.dynX_Lvl}  dyn y: ${this.dynY_Lvl}\
+                    dyn Lvl X: ${this.dynX_Lvl}  dyn y: ${this.dynY_Lvl}\n
+                    applyDriftCompensationX: ${this.applyDriftCompensationX},  applyDriftCompensationY: ${this.applyDriftCompensationY}`);
 
-        this.toCenter()
+        //this.toCenter()
 
     }
 
@@ -253,7 +257,7 @@ class Set2D extends Transform2D{
         if (cbUpdateList.checked) cTree.innerHTML = '';
 
         // 1. Draw grid x10
-        if(this.isDrawGrid_x10){
+        if(this.drawGridx10){
             drawGrid_x10(this.ctx, this)
         }
             
@@ -293,22 +297,12 @@ class Set2D extends Transform2D{
                 //----------------------------------------------------------Dynamic: Recalculate dynamic coordinates, if scale changed
                 
                 // If coordinate id dynamic no drift compensation
-                let applyDriftCompensationX = true
-                let applyDriftCompensationY = true
-                if(this.k_old_draw != k){
 
-                    this.calcDynamicCoordinates( k )
+                if(this.k_last_dyn_calc != k){
+
+                    this.calcDynamicCoordinates()
                 
-                    this.k_old_draw = k
-
-                    // Compensation during pan
-                    if( this.applyDriftCompensationX !== applyDriftCompensationX  )   {
-                        this.applyDriftCompensationX = applyDriftCompensationX 
-                    }// 3. Define borders
-                    if( this.applyDriftCompensationY !== applyDriftCompensationY  )   {
-                        this.applyDriftCompensationY = applyDriftCompensationY 
-                    }
-                    
+  
                     
                     isVisibleHorizontally =  
                         s.left + s.width - this.offsetBeforeBorderToDraw    >= visibleLeft &&
@@ -380,8 +374,8 @@ class Set2D extends Transform2D{
                 const visibleHeight = visibleB- visibleT;
 
                 // Центр
-                const px = xToPx(visibleLeft + visibleWidth / 2);
-                const py = yToPy(visibleTop + visibleHeight / 2);
+                const px = xToPx(visibleL + visibleWidth / 2);
+                const py = yToPy(visibleT + visibleHeight / 2);
 
                 const text = s.id;
                 ctxBuffer.textAlign = "center";
@@ -430,10 +424,10 @@ class Set2D extends Transform2D{
 
                 //Gather data for adopted grid
                 // 1. Encounterd shapes larger than text
-                if(this.isDrawAdoptedGrid){
+                if(this.drawGridAdopted){
                     xMap.set(s.left, (xMap.get(s.left) || 0) + 1);
                     xMap.set(s.right, (xMap.get(s.right) || 0) + 1);
-                    yMap.set(s.top, (yMap.get(s.top) || 0) + 1);
+                    yMap.set(s.checkedtop, (yMap.get(s.top) || 0) + 1);
                     yMap.set(s.bottom, (yMap.get(s.bottom) || 0) + 1);
                 }   
 
@@ -443,7 +437,7 @@ class Set2D extends Transform2D{
 
         });
         //----------------------------------------------------------Draw adopted Grid
-        if(this.isDrawAdoptedGrid){
+        if(this.drawGridAdopted){
 
             drawAdoptedGrid(xMap, this.ctx, this, false); // вертикальные линии
             drawAdoptedGrid(yMap, this.ctx, this, true);  // горизонтальные линии
@@ -454,38 +448,47 @@ class Set2D extends Transform2D{
         this.ctx.drawImage(canvasBuffer, 0, 0);
 
 
-    }
+    }checked
 
-    calcDynamicCoordinates( k ){
-        this.logicalWidth  = canvas.width  * (1 - this.paddingInit ) / this.dynX_count
-        this.logicalHeight = canvas.height * (1 - this.paddingInit ) / this.dynY_count
+    calcDynamicCoordinates(){
+        const {k} = this
+        this.dynLvlWidth  = canvas.width  * (1 - this.paddingInit ) / this.dynX_Lvl
+        this.dynLvlHeight = canvas.height * (1 - this.paddingInit ) / this.dynY_Lvl
     
         for(const s of this.shapes){
             if(s.dynamicCoordinate === 'x'){
-                s.width = this.logicalWidth / k  
-                s.left =   s.shift * this.logicalWidth / k  
-                this.applyDriftCompensationX = false
+                s.width = this.dynLvlWidth / this.k  
+                s.left =   s.shift * this.dynLvlWidth / k  
+
+                this.Xmin = Math.min(this.Xmin, Math.min(s.left, s.left + s.width) );
+                this.Xmax = Math.max(this.Xmax, Math.max(s.left, s.left + s.width) );
             }
             if(s.dynamicCoordinate === 'y'){
-                s.height = this.logicalHeight / k    
-                s.left = s.shift * this.logicalHeight / k
-                this.applyDriftCompensationY = false
+                s.height = this.dynLvlHeight / k    
+                s.left = s.shift * this.dynLvlHeight / k
+
+                //Update boundaries
+                this.Ymin = Math.min(this.Ymin, Math.min(s.top, s.top + s.height) );
+                this.Ymax = Math.max(this.Ymax, Math.max(s.top, s.top + s.height) );
             }
         }
+        this.k_last_dyn_calc = k
+        
     }
 
 
    
 
-    settings(drawGrid, adoptTextDirection){
-        if(drawGrid!==undefined)this.drawGrid = drawGrid
-        if(adoptTextDirection!==undefined)this.adoptTextDirection = adoptTextDirection
+    settings(drawGridx10, drawGridAdopted, adoptTextDirection){
+        if(drawGridx10 != undefined)this.drawGridx10 = drawGridx10
+        if(drawGridAdopted != undefined)this.drawGridAdopted = drawGridAdopted
+        if(adoptTextDirection !== undefined)this.adoptTextDirection = adoptTextDirection
     }
 
     toString() {
         return `Boundaries ${this.Xmin} : ${this.Ymin} .. ${this.Xmax} : ${this.Ymax} 
-        \nDynamic horizontal level: ${this.dynX_count} 
-        \nDynamic vertical object level: ${this.dynY_count}` 
+        \nDynamic horizontal level: ${this.dynX_Lvl} 
+        \nDynamic vertical object level: ${this.dynY_Lvl}` 
 
     }
 

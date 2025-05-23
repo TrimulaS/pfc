@@ -124,7 +124,7 @@ styleSplit2.textContent = `
         
         background-color: #007bff;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.1s ease;
     }
     .button:hover {
             background-color: #ddd;
