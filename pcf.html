@@ -155,7 +155,7 @@ ________________|
 			<div class="container">
 				<div class="sidebar">
 					
-					<input type="number" id="numberOfShapes" value="2" min="0" max="10000" step="10" size="6">
+					<input type="number" id="numberOfShapes" value="5" min="0" max="10000" step="10" size="6">
 					<button id = 'b-Generate' class="button">Generate</button>
 					<button id = 'b-Reset' class="button">Reset</button>
 					<button id = 'b-Center' class="button">Center</button>
@@ -212,13 +212,10 @@ ________________|
 
 		function generate(){
 
-
-			// 1. Create trasformation model
-
-			// 2. Create shape set
+			// 1. Create shape set
 			set2D = new Set2D(canvas)
 
-			// 3. Import shapes 
+			// 2. Import shapes 
 			sImporter = new ShapeImporter(set2D.shapes)
 			shapesNum = parseInt(inumberOfShapes.value);
 			// sImporter.fillRandomly(shapesNum , 60, 1000 , 30, 500)
@@ -250,6 +247,7 @@ ________________|
 
 			// 3. Define borders
 			set2D.initSet()
+			
 			//log(shapeSet.toString())
 
 

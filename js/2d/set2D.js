@@ -62,7 +62,7 @@ class Set2D extends Transform2D{
 
         // For dynamic coord: finding maximum level, for static coordinate: find max ranges to calculate prliminary coefficient k
         for (const s of this.shapes) {
-            //console.log("shape entry:", s);
+            console.log("shape entry:", s);
             //Dynamic coordinates
             if(s.dynamicCoordinate ==="x"){                                 // Dynamic x
                 // Dynamic part finding levels
@@ -95,7 +95,7 @@ class Set2D extends Transform2D{
             }
         }
 
-        // FIf dynamic coorduinates present, calc number of levels 
+        // If dynamic coorduinates present, calc number of levels 
         if (dinX_Lvl_min !== Infinity && dinX_Lvl_max !== -Infinity) {
             this.dynX_Lvl = dinX_Lvl_max - dinX_Lvl_min + 1
             this.hasDynamicShapes = true
@@ -121,6 +121,7 @@ class Set2D extends Transform2D{
         this.Xmax = xmax;
         this.Ymin = ymin;
         this.Ymax = ymax;
+
         // define k
         this.toCenterScale()
 
@@ -135,85 +136,19 @@ class Set2D extends Transform2D{
 
         this.toCenterShift()
 
-
-        // // 1.2 Dynamic coordinates: calculate traslate coefficients and choose least to make whole are fit to vewport
-        // const k_dynX = this.canvas.clientWidth / dynWidth
-        // const k_dynY = this.canvas.clientHeight / dynHeight
-
-
-  
-    //     // if( isFinite(dynKx) &&  isFinite(dynKy)){
-    //     //     dynK = Math.max(dynKx,dynKy)
-    //     // }
-    //     // else if(isFinite(dynKx) ){}
-
-    //     // Создаем массив из значений dynKx и dynKy
-    //     const values = [k_dynX, k_dynY];
-
-    //     // Фильтруем значения, чтобы исключить NaN, Infinity и undefined
-    //    const validValues = values.filter(v => typeof v === 'number' && isFinite(v) && v > 0);
-
-    //     // Получаем наибольшее значение из отфильтрованных значений
-    //     // Берём наименьшее из отфильтрованных
-    //     const k_dyn = validValues.length > 0 ? Math.min(...validValues) : 1; // ← 1 — значение по умолчанию
-
-
-
-    //     console.log(`3.2 Coefficients: dynKx =  ${k_dynX}  dynKy =  ${k_dynY}  dynK =  ${k_dyn}`)
-    //     console.log(`3.2.1 dynX_Lvl: ${this.dynX_Lvl}  dynY_Lvl: ${this.dynY_Lvl}   dynWidth ${dynWidth} dynHeight ${dynHeight}`)
-       
-    //     // 3.3 Dynamic coordinates: Calculate borders of each lvl to fit viewport
-    //     // Logical width in veiwport to fit all the levels of dynamic shapes
-        
-        
-
-        
-
-
-        // // 3.4 For dynamic shapes, calculate coordinates  according to caclculated started k value enough to all shapes be in viewport
-        // console.log(`3.4 For dynamic shapes, calculate coordinates:`)
-
-        // this.calcDynamicCoordinates(k_dyn)
-
-        // // this.logicalWidth  = canvas.width   * (1 - this.paddingInit ) / this.dynX_Lvl
-        // // this.logicalHeight = canvas.height  * (1 - this.paddingInit ) / this.dynY_Lvl
-
-        // for (const s of this.shapes) {
-
-        // //     if(s.dynamicCoordinate === 'x'){
-        // //         s.width = this.logicalWidth  / k_dyn
-        // //         s.left =   s.shift * this.logicalWidth /k_dyn
-                
-        // //     }
-        // //     if(s.dynamicCoordinate === 'y'){
-        // //         s.height = this.logicalHeight / k_dyn
-        // //         s.top = s.shift * this.logicalHeight / k_dyn
-        // //     }
-
-
-
+        // 1. сначала всё добавили и нашли границы
+        // 2. масштаб с учётом padding
+        // this.toCenterScale();
+        // if (this.hasDynamicShapes) {
+        //     this.calcDynamicCoordinates();  // фигуры "физически" размещены, Xmin/Xmax актуальны
+        //     this.toCenterScale();
         // }
 
+        // // 2. масштаб с учётом padding
 
-        // And Update to transfor if it is already defined
 
-
-        // // 3.6 Update Trasfer if defined
-        // console.log(`3.6 Update Trasfer if defined`)
-        // if (this.transform instanceof Transform2D) {
-        //     console.log(`3.6 Update Trasfer if defined: trasfer defined`)
-        //     this.updateCoeffToTransform()
-        //     this.transform.updateSourceCoord(xmin, xmax, ymin, ymax)
-        // } else{
-        //     console.log(`(!) Nok trasfer undefined`)
-        // }
-
-        // this.boundingRect = {
-        //     left: xmin,
-        //     top: ymin,
-        //     width: xmax - xmin,
-        //     height: ymax - ymin
-        // };
+        // // 3. сдвиг для центрирования
+        // this.toCenterShift();
 
 
         console.log(`Boundaries x = ${this.Xmin} .. ${this.Xmax} \n          y = ${this.Ymin} .. ${this.Ymax = ymax} \n 
@@ -224,22 +159,6 @@ class Set2D extends Transform2D{
         //this.toCenter()
 
     }
-
-
-
-
-
-
-    // updateCoeffToTransform(){
-    //     const {k_dyn} = this
-    //     // If dynamic shapes present and initial k coefficient is calculated
-    //     console.log(`update k to transfer? k_dyn  ${k_dyn}`)
-    //     if (typeof k_dyn === 'number' && isFinite(k_dyn)) { 
-    //         this.transform.k = k_dyn
-    //         this.transform.k_old = k_dyn
-    //         console.log(`update done k_dyn  ${k_dyn}`)
-    //     }
-    // }
 
 
     
@@ -448,7 +367,7 @@ class Set2D extends Transform2D{
         this.ctx.drawImage(canvasBuffer, 0, 0);
 
 
-    }checked
+    }
 
     calcDynamicCoordinates(){
         const {k} = this

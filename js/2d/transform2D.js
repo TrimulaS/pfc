@@ -71,12 +71,15 @@ class Transform2D {
 		if (validX && validY) {
 			this.k = Math.min(this.Wv / (  ( Xmax - Xmin ) * ( 1 + padding * 2)  ), this.Hv / (  ( Ymax - Ymin ) * ( 1 + padding * 2)  )    );
 			this.k_old = this.k;
+			console.log(`K calculated by both X and Y`)
 		} else if (validX) {
-			this.k = this.Wv / ( Xmax - Xmin ) * ( 1 + padding * 2);
+			this.k = this.Wv / (  ( Xmax - Xmin ) * ( 1 + padding * 2)  );
 			this.k_old = this.k;
+			console.log(`K calculated by X only`)
 		} else if (validY) {
-			this.k = this.Hv / ( Ymax - Ymin ) * ( 1 + padding * 2) ;
+			this.k = this.Hv / (  ( Ymax - Ymin ) * ( 1 + padding * 2)   );
 			this.k_old = this.k;
+			console.log(`K calculated by Y only  ( Ymax - Ymin )= ${( Ymax - Ymin )}`)
 		}
 
 		
@@ -90,17 +93,15 @@ class Transform2D {
 		console.log(`toCenterShift`)
 
 		this.updateDstCoord()
-		const {  k, Xmin, Xmax, Ymin, Ymax, paddingInit:  Wv, Hv } = this;
-
+		const { k, Xmin, Xmax, Ymin, Ymax, Wv, Hv } = this;  // используем реальные размеры viewport
 
 		const centerX = (Xmin + Xmax) / 2;
 		const centerY = (Ymin + Ymax) / 2;
-	
+
 		this.pxShift = Wv / 2 - k * centerX;
 		this.pyShift = Hv / 2 - k * centerY;
 
-		console.log(`pxShift ${this.pxShift}   k ${k}, Wv ${Hv}, Wv ${Hv},  Xmin ${Xmin }   Xmax ${Xmax }   centerX ${centerX}  centerX ${centerX} `)
-	
+		console.log(`toCenterShift: pxShift ${this.pxShift}   k ${k}, Wv ${Wv}, Hv ${Hv},  Xmin ${Xmin}   Xmax ${Xmax}   centerX ${centerX}  centerY ${centerY}`)
 
 		this.calcVisibleRanges();
 
